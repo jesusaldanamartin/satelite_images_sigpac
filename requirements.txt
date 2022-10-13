@@ -1,4 +1,4 @@
-jsons>=1.6.3
+geojson>=1.6.3
 numpy>=1.23.1
 pandas>=1.4.3
 pyproj>=3.3.1
