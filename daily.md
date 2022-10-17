@@ -67,3 +67,19 @@ Al utilizar el core algorithm para calcular correctamente si un punto está en u
 
 Buscar forma de dividir la lista de pixeles en 4 para ejecutarlos en paralelo y al mismo tiempo guardar el indice correcto para luego sustituir en el arr de source.
 
+## 14/10/2022
+
+ENLACE even-odd rule : https://en.wikipedia.org/wiki/Even%E2%80%93odd_rule 
+Tiene pinta que funciona bien, queda mejorar la eficiencia utiliando los 4M de puntos 311 días.
+Utilizando la máquina virtual del laboratorio, lo que ayer tardó 2 horas, ahora 15 minutos y 52 segundos. Mover .tif a local
+
+## 17/10/2022
+
+Numero de iteracioes:
+
+- Leemos el shapefile puede ser muy grande el SP29000 = 47162 recintos.
+- Por cada recinto leo mi lista de puntos uno a uno.
+- Por cada punto compruebo si este está dentro de un recinto en concreto.
+- 
+len(recinto) ->  varía entre 5 y 100 bordes aprox.
+47162 * (3887458 * (len(recinto)) ) -> (1.833.402.941.960)
