@@ -80,6 +80,20 @@ Numero de iteracioes:
 - Leemos el shapefile puede ser muy grande el SP29000 = 47162 recintos.
 - Por cada recinto leo mi lista de puntos uno a uno.
 - Por cada punto compruebo si este está dentro de un recinto en concreto.
-- 
+ 
 len(recinto) ->  varía entre 5 y 100 bordes aprox.
 47162 * (3887458 * (len(recinto)) ) -> (1.833.402.941.960)
+
+Hace demasiadas iteraciones, es inviable continuar con este método. Pero si no compruebo los puntos de su arr por cada recinto, como se que pixeles de sus MASK cambiar ¿? , además que no tienen porque coincidir los pixeles por algunas décimas y puede mover el resultado en algunos pixeles.
+
+NUMBA ¿? -> mejora considerablemente
+
+## 20/10/2022
+
+Crear máscara para cada uno de los shapefiles y realizar algoritmos para cada uno. Despues mergeamos todos en un único TIFF.
+
+Máscara hecha, ahora trabajando en final_version.py
+
+Ejecutando con numba(@jit) el municipio de fuengirola:
+
+El municipio tiene un tamaño de 102472 puntos (malaga provincia tenia 4M) y tiene 99 geometrías diferentes (malaga provincia tenia 48K), en mi pc con numba va a 1,4 iteraciones/s . TARDANDO EN TOTAL = 3 minutos y 32 segundos
