@@ -15,6 +15,7 @@ from shapely.geometry import Polygon, MultiPolygon, MultiLineString, MultiPoint,
 
 from tqdm import tqdm
 from numba import jit
+from numba.core.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning
 import fiona
 import numpy as np
 from multiprocessing import Process, Manager
@@ -23,7 +24,10 @@ from typing import Any, List, Tuple, BinaryIO
 from pathlib import Path
 from os import listdir, sep
 from os.path import isfile, join
+import warnings
 
+warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
+warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 
 COD_USO = ['AG' ,'CA', 'CF' ,'CI', 'CS', 'CV', 'ED', 'EP', 'FF', 'FL', 'FO',
             'FS', 'FV', 'FY', 'IM', 'IV', 'OC', 'OF', 'OV', 'PA', 'PR', 'PS','TA', 'TH',
@@ -218,11 +222,12 @@ def save_output_file(tif_path: str, shp_path: str,output_name: str):
         with rasterio.open(output_name, 'w', **profile) as dst:
             dst.write(matrix, 1)
 
-save_output_file("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/malagaMask.tif",
-                "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP22_REC_29.shp",
-                "29_sigpac.tif")
+save_output_file("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/29008_masked.tif",
+                "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP20_REC_29008.shp",
+                "29008_sigpac.tif")
 
 #? Windows Path
 # create_output("C:\\TFG_resources\\satelite_images_sigpac\\29008_masked.tif",
 #                 "C:\\TFG_resources\\satelite_images_sigpac\\Shapefile_Data\\SP20_REC_29008.shp",
 #                 "29008_sigpac.tif")
+

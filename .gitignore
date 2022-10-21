@@ -3,4 +3,5 @@ Shapefile_Data
 Satelite_Images
 .env
 *.aux
+*.aux.xml
 __pycache__
