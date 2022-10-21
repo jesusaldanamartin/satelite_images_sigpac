@@ -94,8 +94,23 @@ Crear máscara para cada uno de los shapefiles y realizar algoritmos para cada u
 
 Máscara hecha, ahora trabajando en final_version.py
 
-Ejecutando con numba(@jit) el municipio de fuengirola:
+Ejecutando con  el decorador @jit el municipio de fuengirola:
 
-El municipio tiene un tamaño de 102472 puntos (malaga provincia tenia 4M) y tiene 99 geometrías diferentes (malaga provincia tenia 48K), en mi pc con numba va a 1,4 iteraciones/s . TARDANDO EN TOTAL = 3 minutos y 32 segundos
+El municipio tiene un tamaño de 102472 puntos (malaga provincia tenia 4M) y tiene 99 geometrías diferentes (malaga provincia tenia 48K), en mi pc con numba va a 1,4 iteraciones/s . TARDANDO EN TOTAL = 3 minutos y 32 segundos.
+                                            En maquina virtual ha tardado = 2 minutos y 26 segundos.
+El municipio de fuengirola salida correcta comprobada.
+
+Ejecutar el municipio de cartama ahora es viable pero tarda 70 horas. Cartama tiene 1,1M pixeles y 25K geometrias es aproximadamente la mitad de grande que malaga provincia.  12,5 KB tamaño de archivo.
+
+Ejecutando el municipio de humilladero tarda aprox 1 hora, este municipio posee 346522 pixeles y 1232 geomtrias. 6,1 KB de tamaño de archivo.
 
 ## 21/10/2022
+
+Completamente documentado el archivo python final del proyecto. Queda aún hacer una última prueba con un archivo muy grande tipo malaga o alhaurín. Voy a dejar en 2 plano la ejecución de shapefile de alhaurín el grande tarda unas 49 horas.
+
+Cosas aún por hacer o mejorar:
+- minio_connection.py para automatizar la descarga de su minio bucket.
+- Dejar la función de utils.py para mergear todos los .tif en un único archivo. (poco viable)
+- Multithreading forma más viable de mejorar tiempos.
+- Terminar de mejorar la overview del README.md 
+- Poco a poco ir fusionando todas los 290**_sigpac.tif en un único archivo.

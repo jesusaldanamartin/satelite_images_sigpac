@@ -19,6 +19,7 @@ from numba.core.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWa
 import fiona
 import numpy as np
 from multiprocessing import Process, Manager
+import threading
 
 from typing import Any, List, Tuple, BinaryIO
 from pathlib import Path
@@ -192,7 +193,24 @@ def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transform
                     for ind in ind_values:
                         ind_arr = transformer.rowcol(points_list[ind][0],points_list[ind][1])
                         arr[ind_arr[0],ind_arr[1]] = cd_uso #* replace the new use code from SIGPAC in the old band value.
-    return arr
+    # return arr
+
+
+def multithreading(points_list: list, shp_path: str, arr: np.ndarray, transformer: rasterio.Affine) -> None:
+    '''
+    #TODO: FINISH DOCSTRING
+    '''
+    chunked_list = np.array_split(points_list, 3)
+    size = len(chunked_list)
+    p_list = []
+
+    for i in range(size):
+        p = threading.Thread(target=replace_band_matrix, args=(shp_path, chunked_list[i], arr, transformer))
+        p.start()
+        p_list.append(p)
+
+    for p in p_list:
+        p.join()
 
 def save_output_file(tif_path: str, shp_path: str,output_name: str):
     '''Final raster file created.
@@ -217,10 +235,11 @@ def save_output_file(tif_path: str, shp_path: str,output_name: str):
         points_list = [transformer.xy(not_zero_indices[0][i],not_zero_indices[1][i]) 
                         for i in tqdm(range(len(not_zero_indices[0])))] #* coordinates list of src values
 
-        matrix = replace_band_matrix(shp_path, points_list, arr, transformer)
+        #? matrix = replace_band_matrix(shp_path, points_list, arr, transformer)
+        multithreading(points_list, shp_path, arr, transformer)
 
         with rasterio.open(output_name, 'w', **profile) as dst:
-            dst.write(matrix, 1)
+            dst.write(arr, 1)
 
 save_output_file("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/29008_masked.tif",
                 "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP20_REC_29008.shp",
