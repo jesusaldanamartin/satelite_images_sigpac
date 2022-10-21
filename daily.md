@@ -97,3 +97,5 @@ Máscara hecha, ahora trabajando en final_version.py
 Ejecutando con numba(@jit) el municipio de fuengirola:
 
 El municipio tiene un tamaño de 102472 puntos (malaga provincia tenia 4M) y tiene 99 geometrías diferentes (malaga provincia tenia 48K), en mi pc con numba va a 1,4 iteraciones/s . TARDANDO EN TOTAL = 3 minutos y 32 segundos
+
+## 21/10/2022
