@@ -23,7 +23,8 @@ import threading
 
 from typing import Any, List, Tuple, BinaryIO
 from pathlib import Path
-from os import listdir, sep
+import os
+from os import listdir
 from os.path import isfile, join
 import warnings
 
@@ -39,40 +40,40 @@ def get_id_codigo_uso(key: str) -> None:
 
     Args:
         key (str): Key stored in shp metadata.
-    
+
     Returns:
         None
     '''
-    if key == 'AG' : return 10      #* Corrientes y superficies de agua
-    if key == 'CA' : return 11      #* Viales
-    if key == 'CF' : return 12      #* Citricos-Frutal
-    if key == 'CI' : return 13      #* Citricos
-    if key == 'CS' : return 14      #* Citricos-Frutal de cascara
-    if key == 'CV' : return 15      #* Citricos-Viñedo
-    if key == 'ED' : return 16      #* Edificaciones
-    if key == 'EP' : return 17      #* Elemento del Paisaje
-    if key == 'FF' : return 18      #* Frutal de Cascara-Frutal
-    if key == 'FL' : return 19      #* Frutal de Cascara-Olivar
-    if key == 'FO' : return 20      #* Forestal
-    if key == 'FS' : return 21      #* Frutal de Cascara
-    if key == 'FV' : return 22      #* Frutal de Cascara-Viñedo
-    if key == 'FY' : return 23      #* Frutal
-    if key == 'IM' : return 24      #* Improductivo
-    if key == 'IV' : return 25      #* Imvernadero y cultivos bajo plastico
-    if key == 'OC' : return 26      #* Olivar-Citricos
-    if key == 'OF' : return 27      #* Olivar-Frutal
-    if key == 'OV' : return 28      #* Olivar
-    if key == 'PA' : return 29      #* Pasto Arbolado
-    if key == 'PR' : return 30      #* Pasto Arbustivo
-    if key == 'PS' : return 31      #* Pastizal
-    if key == 'TA' : return 32      #* Tierra Arable
-    if key == 'TH' : return 33      #* Huerta
-    if key == 'VF' : return 34      #* Frutal-Viñedo
-    if key == 'VI' : return 35      #* Viñedo
-    if key == 'VO' : return 36      #* Olivar-Viñedo
-    if key == 'ZC' : return 37      #* Zona Concentrada
-    if key == 'ZU' : return 38      #* Zona Urbana
-    if key == 'ZV' : return 39      #* Zona Censurada
+    if key == 'AG' : return 1      #* Corrientes y superficies de agua
+    if key == 'CA' : return 2      #* Viales
+    if key == 'CF' : return 3      #* Citricos-Frutal
+    if key == 'CI' : return 4      #* Citricos
+    if key == 'CS' : return 5      #* Citricos-Frutal de cascara
+    if key == 'CV' : return 6      #* Citricos-Viñedo
+    if key == 'ED' : return 7      #* Edificaciones
+    if key == 'EP' : return 8      #* Elemento del Paisaje
+    if key == 'FF' : return 9      #* Frutal de Cascara-Frutal
+    if key == 'FL' : return 10      #* Frutal de Cascara-Olivar
+    if key == 'FO' : return 11      #* Forestal
+    if key == 'FS' : return 12      #* Frutal de Cascara
+    if key == 'FV' : return 13      #* Frutal de Cascara-Viñedo
+    if key == 'FY' : return 14      #* Frutal
+    if key == 'IM' : return 15      #* Improductivo
+    if key == 'IV' : return 16      #* Imvernadero y cultivos bajo plastico
+    if key == 'OC' : return 17      #* Olivar-Citricos
+    if key == 'OF' : return 18      #* Olivar-Frutal
+    if key == 'OV' : return 19      #* Olivar
+    if key == 'PA' : return 20      #* Pasto Arbolado
+    if key == 'PR' : return 21      #* Pasto Arbustivo
+    if key == 'PS' : return 22      #* Pastizal
+    if key == 'TA' : return 23      #* Tierra Arable
+    if key == 'TH' : return 24      #* Huerta
+    if key == 'VF' : return 25      #* Frutal-Viñedo
+    if key == 'VI' : return 26      #* Viñedo
+    if key == 'VO' : return 27      #* Olivar-Viñedo
+    if key == 'ZC' : return 28      #* Zona Concentrada
+    if key == 'ZU' : return 29      #* Zona Urbana
+    if key == 'ZV' : return 30      #* Zona Censurada
 
 
 def mask_shp(shp_path: str, tif_path: str, output_name: str):
@@ -102,14 +103,65 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
     with rasterio.open(output_name, "w", **out_meta) as dest:
         dest.write(out_image)
 
-# mask_shp("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP22_REC_29.shp",
-#             "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/malagaMask.tif", 
-#             "29017_masked.tif")
+def masked_all_shapefiles_in_directory(folder_path: str):
+    '''Read all shapefiles stored in directory and create a mask for each file.
 
-#? Windows Path
-# mask_shp("C:\TFG_resources\satelite_images_sigpac\Shapefile_Data\SP20_REC_29017.shp",
-#             "C:\TFG_resources\satelite_img\classification_30SUF.tif", 
-#             "29017_masked.tif")
+    Args:
+        folder_path (str): Path to the directory where all shapefiles are stored.
+    
+    Return:
+        A file is created for each shp in folder.
+    '''
+
+    path_masked_images = "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/"
+    path_tif_image = "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/malagaMask.tif"
+
+    folder_files = os.listdir(folder_path)
+    for file in folder_files:
+        extension = file.split('.')[1]
+        file_number = file.split('.')[0]
+        if extension == 'shp':
+            mask_shp(folder_path+file, path_tif_image, path_masked_images+f"290{file_number[-2:]}_masked.tif")
+
+def merge_tiff_images(output_name: str, folder_path: str):
+    '''Merge all tiff images stored in folder_path.
+
+    All metadata is saved and stored so the output will be be only a merge of all images given as input.
+
+    Args:
+        output_name (str): Name as the output file will be stored.
+        folder_path (str): Path to the folder where tiff images are.
+
+    Returns: 
+        The merged image will be stored in working directory.
+    '''
+
+    src_files_to_mosaic = []
+    folder_files = os.listdir(folder_path)
+    output_file = folder_path+f"/{output_name}.tif"
+
+    for i in folder_files:
+        src = rasterio.open(i)
+        src_files_to_mosaic.append(src)
+
+    mosaic, out_trans = merge(src_files_to_mosaic)
+
+    out_meta = src.meta.copy()
+
+    out_meta.update({"driver": "GTiff",
+        "height": mosaic.shape[1],
+        "width": mosaic.shape[2],
+        "transform": out_trans,
+        "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs "
+        }
+        )
+    try:
+        with rasterio.open(output_file, "w", **out_meta) as dest:
+            dest.write(mosaic)
+    except rasterio._err.CPLE_BaseError:
+        print("Rasterio merge file already exists")
+        pass
+    return mosaic
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -136,7 +188,7 @@ def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
             if slope == 0:
                 return True #* point is on boundary
             if (slope < 0) != (polygon[j][1] < polygon[i][1]):
-                in_geometry = not in_geometry #* if slope is crossed an odd number of times the point is in geometry
+                in_geometry = not in_geometry #* if an edge is crossed an odd number of times the point is in geometry
         j = i
     return in_geometry
 
@@ -197,9 +249,18 @@ def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transform
 
 
 def multithreading(points_list: list, shp_path: str, arr: np.ndarray, transformer: rasterio.Affine) -> None:
+    '''Execute the process with multiple threads improving performance.
+
+    Args:
+        points_list (List[(x,y)]): List of all pixels coordinates of the raster.
+        shp_path (str): Path to the shapefile.
+        arr (np.ndarray): Numpy array with the raster's band information.
+        transformer (rasterio.Affine): 'rasterio.transform.AffineTransformer' to convert from (x,y) to band value.
+    
+    Returns:
+        None
     '''
-    #TODO: FINISH DOCSTRING
-    '''
+
     chunked_list = np.array_split(points_list, 3)
     size = len(chunked_list)
     p_list = []
@@ -210,6 +271,7 @@ def multithreading(points_list: list, shp_path: str, arr: np.ndarray, transforme
         p_list.append(p)
 
     for p in p_list:
+        #* wait until all threads have finished
         p.join()
 
 def save_output_file(tif_path: str, shp_path: str,output_name: str):
@@ -241,12 +303,16 @@ def save_output_file(tif_path: str, shp_path: str,output_name: str):
         with rasterio.open(output_name, 'w', **profile) as dst:
             dst.write(arr, 1)
 
-save_output_file("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/29008_masked.tif",
-                "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP20_REC_29008.shp",
-                "29008_sigpac.tif")
+save_output_file("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/29012_masked.tif",
+                "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP20_REC_29012.shp",
+                "29012_sigpac.tif")
 
-#? Windows Path
-# create_output("C:\\TFG_resources\\satelite_images_sigpac\\29008_masked.tif",
+#? Windows Path for save_output_file
+# save_output_file("C:\\TFG_resources\\satelite_images_sigpac\\29008_masked.tif",
 #                 "C:\\TFG_resources\\satelite_images_sigpac\\Shapefile_Data\\SP20_REC_29008.shp",
 #                 "29008_sigpac.tif")
 
+#? Windows Path for mask_shp
+# mask_shp("C:\TFG_resources\satelite_images_sigpac\Shapefile_Data\SP20_REC_29017.shp",
+#             "C:\TFG_resources\satelite_img\classification_30SUF.tif", 
+#             "29017_masked.tif")

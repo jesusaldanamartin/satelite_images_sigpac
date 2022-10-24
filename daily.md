@@ -111,6 +111,10 @@ Completamente documentado el archivo python final del proyecto. Queda aún hacer
 Cosas aún por hacer o mejorar:
 - minio_connection.py para automatizar la descarga de su minio bucket.
 - Dejar la función de utils.py para mergear todos los .tif en un único archivo. (poco viable)
-- Multithreading forma más viable de mejorar tiempos.
+- Multithreading forma más viable de mejorar tiempos. (DONE)
 - Terminar de mejorar la overview del README.md 
 - Poco a poco ir fusionando todas los 290**_sigpac.tif en un único archivo.
+
+## 24/10/2022
+
+Tener en una carpeta todos los shpaefiles junstos por cada shapefile obtener su respectiva máscara con la funcion masked_shp, guardamos cada mascara en una carpeta auxiliar. Y de nuevo por cada shapefile en la carpeta llamo a la función multithreading.
