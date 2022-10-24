@@ -328,7 +328,7 @@ def read_masked_files(folder_path):
                             path_shapefile_data+f"/SP20_REC_29{file_number[2:5]}.shp",
                             path_sigpac+f"29{file_number[2:5]}_sigpac.tif")
 
-            print("File:"+file+"finished")
+            print("File: "+file+" finished")
 read_masked_files("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/")
 
 
