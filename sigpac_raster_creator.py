@@ -117,11 +117,14 @@ def masked_all_shapefiles_in_directory(folder_path: str):
     path_tif_image = "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/malagaMask.tif"
 
     folder_files = os.listdir(folder_path)
-    for file in folder_files:
+    for file in tqdm(folder_files):
         extension = file.split('.')[1]
         file_number = file.split('.')[0]
         if extension == 'shp':
-            mask_shp(folder_path+file, path_tif_image, path_masked_images+f"290{file_number[-2:]}_masked.tif")
+            mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"29{file_number[-3:]}_masked.tif")
+    return "FINISHED"
+
+#? masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data")
 
 def merge_tiff_images(output_name: str, folder_path: str):
     '''Merge all tiff images stored in folder_path.
@@ -138,7 +141,6 @@ def merge_tiff_images(output_name: str, folder_path: str):
 
     src_files_to_mosaic = []
     folder_files = os.listdir(folder_path)
-    output_file = folder_path+f"/{output_name}.tif"
 
     for i in folder_files:
         src = rasterio.open(i)
@@ -156,12 +158,14 @@ def merge_tiff_images(output_name: str, folder_path: str):
         }
         )
     try:
-        with rasterio.open(output_file, "w", **out_meta) as dest:
+        with rasterio.open(output_name, "w", **out_meta) as dest:
             dest.write(mosaic)
     except rasterio._err.CPLE_BaseError:
         print("Rasterio merge file already exists")
         pass
     return mosaic
+
+# merge_tiff_images("malagaMask_sigpac.tif","/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_sigpac/MALAGA/")
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -303,9 +307,32 @@ def save_output_file(tif_path: str, shp_path: str,output_name: str):
         with rasterio.open(output_name, 'w', **profile) as dst:
             dst.write(arr, 1)
 
-save_output_file("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/29012_masked.tif",
-                "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP20_REC_29012.shp",
-                "29012_sigpac.tif")
+# save_output_file("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/29012_masked.tif",
+#                 "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/SP20_REC_29012.shp",
+#                 "29012_sigpac.tif")
+
+def read_masked_files(folder_path):
+    '''
+    '''
+
+    path_shapefile_data = "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data"
+    path_sigpac = "/home/jesus/Documents/satelite_images_sigpac/masked_sigpac/MALAGA/"
+    
+    folder_files = os.listdir(folder_path)
+
+    for file in folder_files:
+        file_number = file.split('.')[0]
+
+        if os.path.getsize(folder_path+f"{file}") < 99999999 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
+            print(file)
+            save_output_file(folder_path+f"/{file}",
+                            path_shapefile_data+f"/SP20_REC_29{file_number[2:5]}.shp",
+                            path_sigpac+f"29{file_number[2:5]}_sigpac.tif")
+
+            print("File:"+file+"finished")
+
+read_masked_files("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/")
+
 
 #? Windows Path for save_output_file
 # save_output_file("C:\\TFG_resources\\satelite_images_sigpac\\29008_masked.tif",
