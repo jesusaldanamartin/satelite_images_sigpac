@@ -233,7 +233,7 @@ def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transform
 
     ind_values=[]
     with fiona.open(path) as layer:
-        for feature in tqdm(layer):
+        for feature in tqdm(layer):#TODO TQDM
             ord_dict = feature['properties']
 
             for key in ord_dict.values():
@@ -299,7 +299,7 @@ def save_output_file(tif_path: str, shp_path: str,output_name: str):
         not_zero_indices = np.nonzero(arr) #* get all indexes of non-zero values in array to reduce its size
 
         points_list = [transformer.xy(not_zero_indices[0][i],not_zero_indices[1][i]) 
-                        for i in tqdm(range(len(not_zero_indices[0])))] #* coordinates list of src values
+                        for i in tqdm(range(len(not_zero_indices[0])))] #* coordinates list of src values #TQDM
 
         #? matrix = replace_band_matrix(shp_path, points_list, arr, transformer)
         multithreading(points_list, shp_path, arr, transformer)
@@ -317,7 +317,6 @@ def read_masked_files(folder_path):
 
     path_shapefile_data = "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data"
     path_sigpac = "/home/jesus/Documents/satelite_images_sigpac/masked_sigpac/MALAGA/"
-    
     folder_files = os.listdir(folder_path)
 
     for file in folder_files:
@@ -330,7 +329,6 @@ def read_masked_files(folder_path):
                             path_sigpac+f"29{file_number[2:5]}_sigpac.tif")
 
             print("File:"+file+"finished")
-
 read_masked_files("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/")
 
 
