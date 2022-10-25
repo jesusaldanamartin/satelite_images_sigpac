@@ -322,12 +322,13 @@ def read_masked_files(folder_path):
     for file in folder_files:
         file_number = file.split('.')[0]
 
-        if os.path.getsize(folder_path+f"{file}") < 99999999 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
+        if os.path.getsize(folder_path+f"{file}") < 9999999 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
             print(file)
+            print("")
             save_output_file(folder_path+f"/{file}",
                             path_shapefile_data+f"/SP20_REC_29{file_number[2:5]}.shp",
                             path_sigpac+f"29{file_number[2:5]}_sigpac.tif")
-
+            print("")
             print("File: "+file+" finished")
 read_masked_files("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/")
 
