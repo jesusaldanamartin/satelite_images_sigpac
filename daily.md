@@ -134,4 +134,4 @@ Jaen
 
 Cadiz son 45 municipios diferentes. Algunos municipos no hacen overlap con sus classification_29*** por lo que cadiz saldrá sin todas las parcelas(concretamente el sigpac SP20_REC_11016)
 
-classification_30SUF = MALAGA
+nohup python3 sigpac_raster_.....py > /dev/null 2>&1&

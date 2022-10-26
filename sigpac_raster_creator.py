@@ -147,7 +147,7 @@ def merge_tiff_images(output_name: str, folder_path: str):
     folder_files = os.listdir(folder_path)
 
     for file in folder_files:
-        src = rasterio.open(file)
+        src = rasterio.open(folder_path+f"/{file}")
         src_files_to_mosaic.append(src)
 
     mosaic, out_trans = merge.merge(src_files_to_mosaic)
@@ -169,7 +169,8 @@ def merge_tiff_images(output_name: str, folder_path: str):
         pass
     return mosaic
 
-# merge_tiff_images("malagaMask_sigpac.tif","/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_sigpac/MALAGA/")
+# merge_tiff_images("malagaMask_sigpac.tif",
+#                   "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_sigpac/MALAGA/")
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -333,7 +334,7 @@ def read_masked_files(folder_path):
     for file in folder_files:
         file_number = file.split('.')[0]
 
-        if os.path.getsize(folder_path+f"{file}") < 1764228 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
+        if os.path.getsize(folder_path+f"{file}") < 5000000 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
             print(file)
             print("")
             save_output_file(folder_path+f"/{file}",
