@@ -121,7 +121,11 @@ def masked_all_shapefiles_in_directory(folder_path: str):
         extension = file.split('.')[1]
         file_number = file.split('.')[0]
         if extension == 'shp':
-            mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"29{file_number[-3:]}_masked.tif")
+            try:
+                mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"29{file_number[-3:]}_masked.tif")
+            except ValueError:
+                print(file+" does not overlap figure")
+
     return "FINISHED"
 
 #? masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data")
@@ -312,7 +316,14 @@ def save_output_file(tif_path: str, shp_path: str,output_name: str):
 #                 "29012_sigpac.tif")
 
 def read_masked_files(folder_path):
-    '''
+    '''For every masked file in folder save_output_file() function is called 
+    to convert input masked files into masked sigpac tif.
+
+    Args:
+        folder_path (str): Path to the folder with all masked files.
+
+    Returns:
+        One file for each shapefile.
     '''
 
     path_shapefile_data = "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data"
@@ -322,7 +333,7 @@ def read_masked_files(folder_path):
     for file in folder_files:
         file_number = file.split('.')[0]
 
-        if os.path.getsize(folder_path+f"{file}") < 1164228 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
+        if os.path.getsize(folder_path+f"{file}") < 1764228 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
             print(file)
             print("")
             save_output_file(folder_path+f"/{file}",

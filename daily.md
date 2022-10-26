@@ -123,4 +123,15 @@ Tener en una carpeta todos los shpaefiles junstos por cada shapefile obtener su 
 
 Creando mascara de todos los archivos menores a 1164228 bytes. Descargando los datos y creando la mascara inicial de cadiz.
 
+MALAGA = 30SUF + 30SUG
+CADIZ = 29SPA + 29SQV + 30STF + 30STG + 30SUF
+Granada =
+Cordoba
+Almeria
+Sevilla
+Huelva
+Jaen
+
+Cadiz son 45 municipios diferentes. Algunos municipos no hacen overlap con sus classification_29*** por lo que cadiz saldrá sin todas las parcelas(concretamente el sigpac SP20_REC_11016)
+
 classification_30SUF = MALAGA
