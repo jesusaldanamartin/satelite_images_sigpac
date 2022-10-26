@@ -142,11 +142,11 @@ def merge_tiff_images(output_name: str, folder_path: str):
     src_files_to_mosaic = []
     folder_files = os.listdir(folder_path)
 
-    for i in folder_files:
-        src = rasterio.open(i)
+    for file in folder_files:
+        src = rasterio.open(file)
         src_files_to_mosaic.append(src)
 
-    mosaic, out_trans = merge(src_files_to_mosaic)
+    mosaic, out_trans = merge.merge(src_files_to_mosaic)
 
     out_meta = src.meta.copy()
 
@@ -161,7 +161,7 @@ def merge_tiff_images(output_name: str, folder_path: str):
         with rasterio.open(output_name, "w", **out_meta) as dest:
             dest.write(mosaic)
     except rasterio._err.CPLE_BaseError:
-        print("Rasterio merge file already exists")
+        print("Merged file already exists")
         pass
     return mosaic
 
@@ -322,7 +322,7 @@ def read_masked_files(folder_path):
     for file in folder_files:
         file_number = file.split('.')[0]
 
-        if os.path.getsize(folder_path+f"{file}") < 9999999 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
+        if os.path.getsize(folder_path+f"{file}") < 1164228 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
             print(file)
             print("")
             save_output_file(folder_path+f"/{file}",

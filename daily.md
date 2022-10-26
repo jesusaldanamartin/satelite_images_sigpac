@@ -118,3 +118,9 @@ Cosas aún por hacer o mejorar:
 ## 24/10/2022
 
 Tener en una carpeta todos los shpaefiles junstos por cada shapefile obtener su respectiva máscara con la funcion masked_shp, guardamos cada mascara en una carpeta auxiliar. Y de nuevo por cada shapefile en la carpeta llamo a la función multithreading.
+
+## 26/10/2022
+
+Creando mascara de todos los archivos menores a 1164228 bytes. Descargando los datos y creando la mascara inicial de cadiz.
+
+classification_30SUF = MALAGA
