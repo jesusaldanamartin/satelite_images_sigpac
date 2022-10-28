@@ -35,6 +35,24 @@ COD_USO = ['AG' ,'CA', 'CF' ,'CI', 'CS', 'CV', 'ED', 'EP', 'FF', 'FL', 'FO',
             'FS', 'FV', 'FY', 'IM', 'IV', 'OC', 'OF', 'OV', 'PA', 'PR', 'PS','TA', 'TH',
             'VF', 'VI', 'VO', 'ZC', 'ZU', 'ZV' ]
 
+TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH', '30SYJ',
+    '30SYH', '31SCD', '31SED', '31SDD', '29SQC', '29TPF', '30SVH', '30SVJ', '30SWJ',
+    '30STG', '30SUH', '29SPD', '29TPH', '30TUM', '30SUJ', '30SUE', '30TVK', '31TCF',
+    '29SQD', '31TEE', '29SQA', '29SPA', '30SWF', '30SUF', '30TTM', '29TQG', '29TQE',
+    '29SQB', '30TTK', '29TNG', '29SPB', '29SQV', '30SXG', '30SXJ', '30SXH', '30SUG',
+    '30STJ', '30TWL', '29TPE', '30STF', '30SVF', '30STE', '30TWK', '30TUK', '30SWG',
+    '30SVG', '29TQF', '30SWH', '31TBE', '30SXF', '30TTL', '30TVL', '31TBF', '30TUL',
+    '30TYK', '30TXK', '31TDF', '30TYL', '31TBG', '30TYM', '27RYM', '30TXL', '29TNH',
+    '27RYL', '29TQH', '31TCG', '27RYN', '30TXM', '31TDG', '30TUN', '30TVM', '31TFE',
+    '30TWM', '29TNG', '29THN', '29TNJ', '29TPJ', '29TQJ', '30TPU', '30TVP', '30TWP',
+    '30TVN', '30TWN', '30TXN', '30TYN', '31TCH' ]
+
+# sat_folder_files = os.listdir("C:\TFG_resources\satelite_img")
+# for img in sat_folder_files:
+#     cod = img.split("_")[1]
+#     if cod not in TILES:
+#         print(cod)
+
 def get_id_codigo_uso(key: str) -> None:
     '''Raster bands cannot have string value so each cod_uso it is been replaced with an id.
 
@@ -333,15 +351,16 @@ def read_masked_files(folder_path):
 
     for file in folder_files:
         file_number = file.split('.')[0]
-
-        if os.path.getsize(folder_path+f"{file}") < 8000000 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
+# os.path.getsize(folder_path+f"{file}") < 8000000 and
+        if file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
             print(file)
             save_output_file(folder_path+f"/{file}",
                             path_shapefile_data+f"/SP20_REC_29{file_number[2:5]}.shp",
                             path_sigpac+f"29{file_number[2:5]}_sigpac.tif")
             print("")
             print(file+" finished")
-read_masked_files("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/")
+
+read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/masked_images/MALAGA/")
 
 
 #? Windows Path for save_output_file
