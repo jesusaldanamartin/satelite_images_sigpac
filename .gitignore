@@ -1,6 +1,7 @@
 GeoJson_Data
 Shapefile_Data
 Satelite_Images
+masked_shp
 .env
 *.aux
 *.aux.xml

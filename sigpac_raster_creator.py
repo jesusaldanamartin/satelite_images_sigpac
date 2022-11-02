@@ -31,9 +31,28 @@ import warnings
 warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 
-COD_USO = ['AG' ,'CA', 'CF' ,'CI', 'CS', 'CV', 'ED', 'EP', 'FF', 'FL', 'FO',
-            'FS', 'FV', 'FY', 'IM', 'IV', 'OC', 'OF', 'OV', 'PA', 'PR', 'PS','TA', 'TH',
-            'VF', 'VI', 'VO', 'ZC', 'ZU', 'ZV' ]
+COD_USO = ['AG' ,'CA', 'CF' ,'CI', 'CS', 'CV', 'ED', 'EP', 'FF', 'FL', 'FO', 
+    'FS', 'FV', 'FY', 'IM', 'IV', 'OC', 'OF', 'OV', 'PA', 'PR', 'PS',
+    'TA', 'TH', 'VF', 'VI', 'VO', 'ZC', 'ZU', 'ZV' ]
+
+TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH', '30SYJ',
+    '30SYH', '31SCD', '31SED', '31SDD', '29SQC', '29TPF', '30SVH', '30SVJ', '30SWJ',
+    '30STG', '30SUH', '29SPD', '29TPH', '30TUM', '30SUJ', '30SUE', '30TVK', '31TCF',
+    '29SQD', '31TEE', '29SQA', '29SPA', '30SWF', '30SUF', '30TTM', '29TQG', '29TQE',
+    '29SQB', '30TTK', '29TNG', '29SPB', '29SQV', '30SXG', '30SXJ', '30SXH', '30SUG',
+    '30STJ', '30TWL', '29TPE', '30STF', '30SVF', '30STE', '30TWK', '30TUK', '30SWG',
+    '30SVG', '29TQF', '30SWH', '31TBE', '30SXF', '30TTL', '30TVL', '31TBF', '30TUL',
+    '30TYK', '30TXK', '31TDF', '30TYL', '31TBG', '30TYM', '27RYM', '30TXL', '29TNH',
+    '27RYL', '29TQH', '31TCG', '27RYN', '30TXM', '31TDG', '30TUN', '30TVM', '31TFE',
+    '30TWM', '29TNG', '29THN', '29TNJ', '29TPJ', '29TQJ', '30TPU', '30TVP', '30TWP',
+    '30TVN', '30TWN', '30TXN', '30TYN', '31TCH' ]
+
+# sat_folder_files = os.listdir("C:\TFG_resources\satelite_img")
+# for img in sat_folder_files:
+#     cod = img.split("_")[1]
+#     cod = cod.split(".")[0]
+#     if cod not in TILES:
+#         print(cod)
 
 TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH', '30SYJ',
     '30SYH', '31SCD', '31SED', '31SDD', '29SQC', '29TPF', '30SVH', '30SVJ', '30SWJ',
@@ -131,8 +150,8 @@ def masked_all_shapefiles_in_directory(folder_path: str):
         A file is created for each shp in folder.
     '''
 
-    path_masked_images = "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/"
-    path_tif_image = "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/malagaMask.tif"
+    path_masked_images = "C:\TFG_resources\satelite_images_sigpac\masked_shp\JAEN\JA_"
+    path_tif_image = "C:\TFG_resources\satelite_images_sigpac\masked_shp\spain.tif"
 
     folder_files = os.listdir(folder_path)
     for file in tqdm(folder_files):
@@ -140,13 +159,13 @@ def masked_all_shapefiles_in_directory(folder_path: str):
         file_number = file.split('.')[0]
         if extension == 'shp':
             try:
-                mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"29{file_number[-3:]}_masked.tif")
+                mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"23{file_number[-3:]}_masked.tif")
             except ValueError:
                 print(file+" does not overlap figure")
 
     return "FINISHED"
 
-#? masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data")
+# masked_all_shapefiles_in_directory("C:\TFG_resources\shape_files\Jaen_Municipios_Separados")
 
 def merge_tiff_images(output_name: str, folder_path: str):
     '''Merge all tiff images stored in folder_path.
@@ -187,8 +206,8 @@ def merge_tiff_images(output_name: str, folder_path: str):
         pass
     return mosaic
 
-# merge_tiff_images("malagaMask_sigpac.tif",
-#                   "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_sigpac/MALAGA/")
+merge_tiff_images("malagaMask_sigpac.tif",
+                  "C:\TFG_resources\satelite_images_sigpac\masked_sigpac\MALAGA")
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -360,6 +379,7 @@ def read_masked_files(folder_path):
             print("")
             print(file+" finished")
 
+# 
 read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/masked_images/MALAGA/")
 
 
