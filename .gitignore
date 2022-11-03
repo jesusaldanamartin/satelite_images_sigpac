@@ -6,3 +6,5 @@ masked_shp
 *.aux
 *.aux.xml
 __pycache__
+updated_classification
+results

@@ -24,6 +24,7 @@ import threading
 from typing import Any, List, Tuple, BinaryIO
 from pathlib import Path
 import os
+import json
 from os import listdir
 from os.path import isfile, join
 import warnings
@@ -51,24 +52,6 @@ TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH',
 # for img in sat_folder_files:
 #     cod = img.split("_")[1]
 #     cod = cod.split(".")[0]
-#     if cod not in TILES:
-#         print(cod)
-
-TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH', '30SYJ',
-    '30SYH', '31SCD', '31SED', '31SDD', '29SQC', '29TPF', '30SVH', '30SVJ', '30SWJ',
-    '30STG', '30SUH', '29SPD', '29TPH', '30TUM', '30SUJ', '30SUE', '30TVK', '31TCF',
-    '29SQD', '31TEE', '29SQA', '29SPA', '30SWF', '30SUF', '30TTM', '29TQG', '29TQE',
-    '29SQB', '30TTK', '29TNG', '29SPB', '29SQV', '30SXG', '30SXJ', '30SXH', '30SUG',
-    '30STJ', '30TWL', '29TPE', '30STF', '30SVF', '30STE', '30TWK', '30TUK', '30SWG',
-    '30SVG', '29TQF', '30SWH', '31TBE', '30SXF', '30TTL', '30TVL', '31TBF', '30TUL',
-    '30TYK', '30TXK', '31TDF', '30TYL', '31TBG', '30TYM', '27RYM', '30TXL', '29TNH',
-    '27RYL', '29TQH', '31TCG', '27RYN', '30TXM', '31TDG', '30TUN', '30TVM', '31TFE',
-    '30TWM', '29TNG', '29THN', '29TNJ', '29TPJ', '29TQJ', '30TPU', '30TVP', '30TWP',
-    '30TVN', '30TWN', '30TXN', '30TYN', '31TCH' ]
-
-# sat_folder_files = os.listdir("C:\TFG_resources\satelite_img")
-# for img in sat_folder_files:
-#     cod = img.split("_")[1]
 #     if cod not in TILES:
 #         print(cod)
 
@@ -140,6 +123,10 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
     with rasterio.open(output_name, "w", **out_meta) as dest:
         dest.write(out_image)
 
+# mask_shp("C:\TFG_resources\shape_files\Municipio29_Malaga_pruebas\SP22_REC_29.shp",
+#          "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif", 
+#         "malagaMasked.tif")
+
 def masked_all_shapefiles_in_directory(folder_path: str):
     '''Read all shapefiles stored in directory and create a mask for each file.
 
@@ -151,7 +138,7 @@ def masked_all_shapefiles_in_directory(folder_path: str):
     '''
 
     path_masked_images = "C:\TFG_resources\satelite_images_sigpac\masked_shp\JAEN\JA_"
-    path_tif_image = "C:\TFG_resources\satelite_images_sigpac\masked_shp\spain.tif"
+    path_tif_image = "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif"
 
     folder_files = os.listdir(folder_path)
     for file in tqdm(folder_files):
@@ -165,7 +152,8 @@ def masked_all_shapefiles_in_directory(folder_path: str):
 
     return "FINISHED"
 
-# masked_all_shapefiles_in_directory("C:\TFG_resources\shape_files\Jaen_Municipios_Separados")
+# masked_all_shapefiles_in_directory("C:\\TFG_resources\\shape_files\Malaga_Municipios_Separados")
+
 
 def merge_tiff_images(output_name: str, folder_path: str):
     '''Merge all tiff images stored in folder_path.
@@ -206,8 +194,8 @@ def merge_tiff_images(output_name: str, folder_path: str):
         pass
     return mosaic
 
-merge_tiff_images("malagaMask_sigpac.tif",
-                  "C:\TFG_resources\satelite_images_sigpac\masked_sigpac\MALAGA")
+# merge_tiff_images("malagaMask_sigpac.tif",
+#                   "C:\\TFG_resources\\satelite_images_sigpac\\updated_classification")
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -379,16 +367,42 @@ def read_masked_files(folder_path):
             print("")
             print(file+" finished")
 
-# 
-read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/masked_images/MALAGA/")
+
+# read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/masked_images/MALAGA/")
 
 
-#? Windows Path for save_output_file
-# save_output_file("C:\\TFG_resources\\satelite_images_sigpac\\29008_masked.tif",
-#                 "C:\\TFG_resources\\satelite_images_sigpac\\Shapefile_Data\\SP20_REC_29008.shp",
-#                 "29008_sigpac.tif")
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
 
-#? Windows Path for mask_shp
-# mask_shp("C:\TFG_resources\satelite_images_sigpac\Shapefile_Data\SP20_REC_29017.shp",
-#             "C:\TFG_resources\satelite_img\classification_30SUF.tif", 
-#             "29017_masked.tif")
+def get_raster_metadata_and_points_list(path):
+    with rasterio.open(path) as src:
+        profile = src.profile #* raster metadata
+        arr = src.read(1)
+        transformer = rasterio.transform.AffineTransformer(profile['transform'])
+        not_zero_indices = np.nonzero(arr) #* get all indexes of non-zero values in array to reduce its size
+
+        points_list = [transformer.xy(not_zero_indices[0][i],not_zero_indices[1][i]) 
+                        for i in tqdm(range(len(not_zero_indices[0])))] #* coordinates list of src values #TQDM
+
+    return points_list
+
+
+def apply_style_sheet_to_raster():
+    ''''''
+    get_raster_metadata_and_points_list("")
+    # get_raster_metadata_and_points_list()
+    with open('style_sheet.json') as jfile:
+        dict_json = json.load(jfile)
+
+        for code in dict_json['style_sheet']['SIGPAC_code']:
+            print(code, ":", dict_json['style_sheet']['SIGPAC_code'][code])
+
+
+
+
+apply_style_sheet_to_raster()
