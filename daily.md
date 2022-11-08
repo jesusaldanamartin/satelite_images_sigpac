@@ -148,3 +148,10 @@ De nuevo código terminado pero una locura de iteraciones de momento no es viabl
 ## 04/11/2022
 
 He obtenido resultados. Aprox 10min para toda málaga por lo que es bastante rápido. He realizado varios cambios al json de referencia para intentar maximizar los casos positivos. El principal problema reside en la consideración de bosque abierto o cerrado y las diferencias que hay respecto al SIGPAC y al 'suyo'. Además hay muchos problemas en las zonas urbanas ya que está por SIGPAC se condisera como ZU = Zona Urbana o como IM = Improductivo y recogen grandes extensiones de tierra, sin embargo desde su clasificación al obtenerse desde las imagenes satélites y las reflectancias 'NDVI' ellos consiguen diferenciar dentro de una zona urbana como puede ser málaga capital los parques.
+
+IMPORTANTE RESUMEN DE LOS PROBLEMAS
+
+- Las montañas ellos baresoil y SIGPAC pasto arbustivo
+- Ciudades ellos detectan parques etc... y SIGPAC Improductivo/Edificación
+- Croplands ellos detectan hervaceousvegetation/shrubland y SIGPAC no distingue aplica a toda la parcela cropland (tiene sentido)
+- SIGPAC muestra las carreteras y ellos no lo tienen marcado como cropland
