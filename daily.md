@@ -155,3 +155,15 @@ IMPORTANTE RESUMEN DE LOS PROBLEMAS
 - Ciudades ellos detectan parques etc... y SIGPAC Improductivo/Edificación
 - Croplands ellos detectan hervaceousvegetation/shrubland y SIGPAC no distingue aplica a toda la parcela cropland (tiene sentido)
 - SIGPAC muestra las carreteras y ellos no lo tienen marcado como cropland
+
+## 08/11/2022
+
+Posibles casos de uso para desarrollar en el TFG:
+
+Buscar parcelas muy concretas de SIGPAC en las que no se corresponda con el suyo ni el true-color.
+Integrar los datos de SIGPAC en un endpoint de sparql para automatizar el proceso de datos.
+Pensar como aplicar machine learning al sigpac.
+
+He creado unas hojas de estilo en condiciones para la comparacion y para el sigpac.
+
+He cambiado el json aplicandole a los cultivos frutales, olivares y mezclas de estos tipos (aquellos árboreos con tronco y copa) les he dado las caracteristicas de openforest, closedforest y cropland. 

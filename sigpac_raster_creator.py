@@ -127,6 +127,10 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
 #          "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif", 
 #         "malagaMasked.tif")
 
+# mask_shp("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/CADIZ/",
+#          "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif", 
+#         "malagaMasked.tif")
+
 def masked_all_shapefiles_in_directory(folder_path: str):
     '''Read all shapefiles stored in directory and create a mask for each file.
 
@@ -362,13 +366,13 @@ def read_masked_files(folder_path):
         if file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
             print(file)
             save_output_file(folder_path+f"/{file}",
-                            path_shapefile_data+f"/SP20_REC_29{file_number[2:5]}.shp",
-                            path_sigpac+f"29{file_number[2:5]}_sigpac.tif")
+                            path_shapefile_data+f"/SP22_REC_11{file_number[2:5]}.shp",
+                            path_sigpac+f"11{file_number[2:5]}_sigpac.tif")
             print("")
             print(file+" finished")
 
 
-# read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/masked_images/MALAGA/")
+# read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/masked_images/CADIZ/")
 
 #!---------------------------
 #!---------------------------
@@ -423,6 +427,34 @@ def raster_comparison(rows,cols, new_raster_output, style_sheet, sigpac_band, cl
         pass
     return new_raster_output
 
+def raster_comparison_cropland(rows,cols, new_raster_output, style_sheet, sigpac_band, classification_band):
+
+    try:
+        for x in tqdm(range(rows)):
+            for y in range(cols):
+                if sigpac_band[x,y] != 0 and classification_band[x,y] !=0:
+                    # print(style_sheet[str(sigpac_band[x,y])])
+                    # print(classification_band[x,y])
+                    if style_sheet[str(sigpac_band[x,y])] == 6 and classification_band[x,y] == 6:
+                        if style_sheet[str(sigpac_band[x,y])] == classification_band[x,y]:
+                            # print("SI")
+                            new_raster_output[x,y] = 20 #* same band value
+
+                    elif classification_band[x,y] == 6 and style_sheet[str(sigpac_band[x,y])] != 6:
+                        # print("hey")
+                        new_raster_output[x,y] = 21 #* diff band value:
+
+                    elif classification_band[x,y] != 6 and style_sheet[str(sigpac_band[x,y])] == 6:
+                        # print("hey")
+                        new_raster_output[x,y] = 22 #* diff band value:
+                    else:
+                        # print("tmb")
+                        new_raster_output[x,y] = 0
+                
+    except IndexError:
+        pass
+    return new_raster_output
+
 def apply_style_sheet_to_raster():
     '''For blablablablabla
 
@@ -430,25 +462,16 @@ def apply_style_sheet_to_raster():
 
     Returns:
     '''
-    with open('id_style_sheet.json') as jfile:
+    with open('crop_style_sheet.json') as jfile:
         dict_json = json.load(jfile)
         style_sheet = dict_json['style_sheet']['SIGPAC_code']
-        # print(style_sheet.keys())
-        # print(style_sheet.values())
-        # print(style_sheet["28"])
-        # # print(style_sheet["28"][0])
-        # print(len(style_sheet["3"]))
-
-        # print(style_sheet)
-
+    
     with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malagaMask_sigpac.tif") as src:
         sigpac_band = src.read(1) 
         # ar_unique = np.unique(sigpac_band)
         rows = sigpac_band.shape[0] #* 10654
         cols = sigpac_band.shape[1] #* 16555
-        print(rows)
-        print(cols)
-    
+
     with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malagaMasked.tif") as src:
         classification_band = src.read(1) 
         arr = src.read(1)
@@ -456,28 +479,10 @@ def apply_style_sheet_to_raster():
         # ar_unique = np.unique(classification_band)
         rows = classification_band.shape[0] #* 10654
         cols = classification_band.shape[1] #* 16555
-        print(rows)
-        print(cols)
 
     new_raster_output = raster_comparison(rows, cols, arr, style_sheet, sigpac_band, classification_band)
 
-    with rasterio.open("raster_comparison_bosques.tif", 'w', **profile) as dst:
+    with rasterio.open("raster_comparison.tif", 'w', **profile) as dst:
         dst.write(new_raster_output, 1)
 
 apply_style_sheet_to_raster()
-
-
-    # for x in range(0, cols - 1):
-    #     for y in range(0, rows -1):
-    #         if sigpac_band[x,y] != 0 and classification_band[x,y] !=0:
-    #             if len(style_sheet[str(sigpac_band[x,y])]) > 1:
-    #                 for item in style_sheet[str(sigpac_band[x,y])]:
-    #                     if classification_band[x,y] in style_sheet[str(sigpac_band[x,y])]:
-    #                         print("OK",":",item)
-    #                     else:
-    #                         print("WRONG",":",classification_band[x,y]," distinto ",style_sheet[str(sigpac_band[x,y])])
-    #             else:
-    #                 if style_sheet[str(sigpac_band[x,y])] == classification_band[x,y]:
-    #                     print("OK 2",":", classification_band[x,y])
-    #                 else:
-    #                     print("WRONG 2",":",classification_band[x,y]," distinto ",style_sheet[str(sigpac_band[x,y])])
