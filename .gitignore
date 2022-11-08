@@ -1,7 +1,11 @@
 GeoJson_Data
 Shapefile_Data
 Satelite_Images
+masked_shp
 .env
 *.aux
 *.aux.xml
 __pycache__
+updated_classification
+results
+*.tif

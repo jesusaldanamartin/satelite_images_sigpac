@@ -24,6 +24,7 @@ import threading
 from typing import Any, List, Tuple, BinaryIO
 from pathlib import Path
 import os
+import json
 from os import listdir
 from os.path import isfile, join
 import warnings
@@ -31,9 +32,28 @@ import warnings
 warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 
-COD_USO = ['AG' ,'CA', 'CF' ,'CI', 'CS', 'CV', 'ED', 'EP', 'FF', 'FL', 'FO',
-            'FS', 'FV', 'FY', 'IM', 'IV', 'OC', 'OF', 'OV', 'PA', 'PR', 'PS','TA', 'TH',
-            'VF', 'VI', 'VO', 'ZC', 'ZU', 'ZV' ]
+COD_USO = ['AG' ,'CA', 'CF' ,'CI', 'CS', 'CV', 'ED', 'EP', 'FF', 'FL', 'FO', 
+    'FS', 'FV', 'FY', 'IM', 'IV', 'OC', 'OF', 'OV', 'PA', 'PR', 'PS',
+    'TA', 'TH', 'VF', 'VI', 'VO', 'ZC', 'ZU', 'ZV' ]
+
+TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH', '30SYJ',
+    '30SYH', '31SCD', '31SED', '31SDD', '29SQC', '29TPF', '30SVH', '30SVJ', '30SWJ',
+    '30STG', '30SUH', '29SPD', '29TPH', '30TUM', '30SUJ', '30SUE', '30TVK', '31TCF',
+    '29SQD', '31TEE', '29SQA', '29SPA', '30SWF', '30SUF', '30TTM', '29TQG', '29TQE',
+    '29SQB', '30TTK', '29TNG', '29SPB', '29SQV', '30SXG', '30SXJ', '30SXH', '30SUG',
+    '30STJ', '30TWL', '29TPE', '30STF', '30SVF', '30STE', '30TWK', '30TUK', '30SWG',
+    '30SVG', '29TQF', '30SWH', '31TBE', '30SXF', '30TTL', '30TVL', '31TBF', '30TUL',
+    '30TYK', '30TXK', '31TDF', '30TYL', '31TBG', '30TYM', '27RYM', '30TXL', '29TNH',
+    '27RYL', '29TQH', '31TCG', '27RYN', '30TXM', '31TDG', '30TUN', '30TVM', '31TFE',
+    '30TWM', '29TNG', '29THN', '29TNJ', '29TPJ', '29TQJ', '30TPU', '30TVP', '30TWP',
+    '30TVN', '30TWN', '30TXN', '30TYN', '31TCH' ]
+
+# sat_folder_files = os.listdir("C:\TFG_resources\satelite_img")
+# for img in sat_folder_files:
+#     cod = img.split("_")[1]
+#     cod = cod.split(".")[0]
+#     if cod not in TILES:
+#         print(cod)
 
 def get_id_codigo_uso(key: str) -> None:
     '''Raster bands cannot have string value so each cod_uso it is been replaced with an id.
@@ -103,6 +123,10 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
     with rasterio.open(output_name, "w", **out_meta) as dest:
         dest.write(out_image)
 
+# mask_shp("C:\TFG_resources\shape_files\Municipio29_Malaga_pruebas\SP22_REC_29.shp",
+#          "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif", 
+#         "malagaMasked.tif")
+
 def masked_all_shapefiles_in_directory(folder_path: str):
     '''Read all shapefiles stored in directory and create a mask for each file.
 
@@ -113,8 +137,8 @@ def masked_all_shapefiles_in_directory(folder_path: str):
         A file is created for each shp in folder.
     '''
 
-    path_masked_images = "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/"
-    path_tif_image = "/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/malagaMask.tif"
+    path_masked_images = "C:\TFG_resources\satelite_images_sigpac\masked_shp\JAEN\JA_"
+    path_tif_image = "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif"
 
     folder_files = os.listdir(folder_path)
     for file in tqdm(folder_files):
@@ -122,13 +146,14 @@ def masked_all_shapefiles_in_directory(folder_path: str):
         file_number = file.split('.')[0]
         if extension == 'shp':
             try:
-                mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"29{file_number[-3:]}_masked.tif")
+                mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"23{file_number[-3:]}_masked.tif")
             except ValueError:
                 print(file+" does not overlap figure")
 
     return "FINISHED"
 
-#? masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data")
+# masked_all_shapefiles_in_directory("C:\\TFG_resources\\shape_files\Malaga_Municipios_Separados")
+
 
 def merge_tiff_images(output_name: str, folder_path: str):
     '''Merge all tiff images stored in folder_path.
@@ -147,7 +172,7 @@ def merge_tiff_images(output_name: str, folder_path: str):
     folder_files = os.listdir(folder_path)
 
     for file in folder_files:
-        src = rasterio.open(file)
+        src = rasterio.open(folder_path+f"/{file}")
         src_files_to_mosaic.append(src)
 
     mosaic, out_trans = merge.merge(src_files_to_mosaic)
@@ -169,7 +194,8 @@ def merge_tiff_images(output_name: str, folder_path: str):
         pass
     return mosaic
 
-# merge_tiff_images("malagaMask_sigpac.tif","/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_sigpac/MALAGA/")
+# merge_tiff_images("malagaMask_sigpac.tif",
+#                   "C:\\TFG_resources\\satelite_images_sigpac\\updated_classification")
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -332,24 +358,126 @@ def read_masked_files(folder_path):
 
     for file in folder_files:
         file_number = file.split('.')[0]
-
-        if os.path.getsize(folder_path+f"{file}") < 1764228 and file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
+        # os.path.getsize(folder_path+f"{file}") < 8000000 and
+        if file_number[0:5]+f"_sigpac.tif" not in os.listdir(path_sigpac):
             print(file)
-            print("")
             save_output_file(folder_path+f"/{file}",
                             path_shapefile_data+f"/SP20_REC_29{file_number[2:5]}.shp",
                             path_sigpac+f"29{file_number[2:5]}_sigpac.tif")
             print("")
-            print("File: "+file+" finished")
-read_masked_files("/home/jesus/Documents/satelite_images_sigpac/Satelite_Images/masked_images/MALAGA/")
+            print(file+" finished")
 
 
-#? Windows Path for save_output_file
-# save_output_file("C:\\TFG_resources\\satelite_images_sigpac\\29008_masked.tif",
-#                 "C:\\TFG_resources\\satelite_images_sigpac\\Shapefile_Data\\SP20_REC_29008.shp",
-#                 "29008_sigpac.tif")
+# read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/masked_images/MALAGA/")
 
-#? Windows Path for mask_shp
-# mask_shp("C:\TFG_resources\satelite_images_sigpac\Shapefile_Data\SP20_REC_29017.shp",
-#             "C:\TFG_resources\satelite_img\classification_30SUF.tif", 
-#             "29017_masked.tif")
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
+#!---------------------------
+
+def raster_comparison(rows,cols, new_raster_output, style_sheet, sigpac_band, classification_band):
+    '''This function compares the band values of two different raster. These values 
+    are linked with a style_sheet.json file. Both rasters must have the same size.
+
+    Args:
+        rows (int): Number of rows.
+        cols (int): Number of columns.
+        new_raster_output (np.ndarray): 2D numpy array copy of our input raster.
+        style_sheet (dict): Path
+
+
+    Returns:
+    '''
+
+    try:
+        for x in tqdm(range(rows)):
+            for y in range(cols):
+                if sigpac_band[x,y] != 0 and classification_band[x,y] !=0:
+                    if len(style_sheet[str(sigpac_band[x,y])]) > 1:
+                        for item in style_sheet[str(sigpac_band[x,y])]:
+                            # print(item)
+                            # print("--")
+                            # print(classification_band[x,y])
+                            # print("--")
+                            # print(style_sheet[str(sigpac_band[x,y])])
+                            # print("--")
+                            if classification_band[x,y] in style_sheet[str(sigpac_band[x,y])]:
+                                # print("OK",":",item)
+                                new_raster_output[x,y] = 20 #* same band value
+                            else:
+                                # print("WRONG",":",classification_band[x,y]," distinto ",style_sheet[str(sigpac_band[x,y])])
+                                new_raster_output[x,y] = 21 #* diff band value
+
+                    else:
+                        if style_sheet[str(sigpac_band[x,y])] == classification_band[x,y]:
+                            # print("OK 2",":", classification_band[x,y])
+                            new_raster_output[x,y] = 20 #* same band value
+
+                        else:
+                            # print("WRONG 2",":",classification_band[x,y]," distinto ",style_sheet[str(sigpac_band[x,y])])
+                            new_raster_output[x,y] = 21 #* diff band value
+    except IndexError:
+        pass
+    return new_raster_output
+
+def apply_style_sheet_to_raster():
+    '''For blablablablabla
+
+    Args:
+
+    Returns:
+    '''
+    with open('id_style_sheet.json') as jfile:
+        dict_json = json.load(jfile)
+        style_sheet = dict_json['style_sheet']['SIGPAC_code']
+        # print(style_sheet.keys())
+        # print(style_sheet.values())
+        # print(style_sheet["28"])
+        # # print(style_sheet["28"][0])
+        # print(len(style_sheet["3"]))
+
+        # print(style_sheet)
+
+    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malagaMask_sigpac.tif") as src:
+        sigpac_band = src.read(1) 
+        # ar_unique = np.unique(sigpac_band)
+        rows = sigpac_band.shape[0] #* 10654
+        cols = sigpac_band.shape[1] #* 16555
+        print(rows)
+        print(cols)
+    
+    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malagaMasked.tif") as src:
+        classification_band = src.read(1) 
+        arr = src.read(1)
+        profile = src.profile #* raster metadata
+        # ar_unique = np.unique(classification_band)
+        rows = classification_band.shape[0] #* 10654
+        cols = classification_band.shape[1] #* 16555
+        print(rows)
+        print(cols)
+
+    new_raster_output = raster_comparison(rows, cols, arr, style_sheet, sigpac_band, classification_band)
+
+    with rasterio.open("raster_comparison_bosques.tif", 'w', **profile) as dst:
+        dst.write(new_raster_output, 1)
+
+apply_style_sheet_to_raster()
+
+
+    # for x in range(0, cols - 1):
+    #     for y in range(0, rows -1):
+    #         if sigpac_band[x,y] != 0 and classification_band[x,y] !=0:
+    #             if len(style_sheet[str(sigpac_band[x,y])]) > 1:
+    #                 for item in style_sheet[str(sigpac_band[x,y])]:
+    #                     if classification_band[x,y] in style_sheet[str(sigpac_band[x,y])]:
+    #                         print("OK",":",item)
+    #                     else:
+    #                         print("WRONG",":",classification_band[x,y]," distinto ",style_sheet[str(sigpac_band[x,y])])
+    #             else:
+    #                 if style_sheet[str(sigpac_band[x,y])] == classification_band[x,y]:
+    #                     print("OK 2",":", classification_band[x,y])
+    #                 else:
+    #                     print("WRONG 2",":",classification_band[x,y]," distinto ",style_sheet[str(sigpac_band[x,y])])

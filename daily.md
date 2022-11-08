@@ -134,4 +134,17 @@ Jaen
 
 Cadiz son 45 municipios diferentes. Algunos municipos no hacen overlap con sus classification_29*** por lo que cadiz saldrá sin todas las parcelas(concretamente el sigpac SP20_REC_11016)
 
-classification_30SUF = MALAGA
+nohup python3 sigpac_raster_.....py > /dev/null 2>&1&
+
+## 03/11/2022
+
+JSON style_sheet creado para comparar resultados, iterar sobre su último raster y apicarle un json en caso de que ese numero sea igual a su banda del raster aplico 0 o 1 para ver el nivel de acierto resultante. 
+
+De nuevo código terminado pero una locura de iteraciones de momento no es viable.
+- Probar @jit separando la función
+- Aplicar multithreading
+- Rezar porque con eso funcione
+
+## 04/11/2022
+
+He obtenido resultados. Aprox 10min para toda málaga por lo que es bastante rápido. He realizado varios cambios al json de referencia para intentar maximizar los casos positivos. El principal problema reside en la consideración de bosque abierto o cerrado y las diferencias que hay respecto al SIGPAC y al 'suyo'. Además hay muchos problemas en las zonas urbanas ya que está por SIGPAC se condisera como ZU = Zona Urbana o como IM = Improductivo y recogen grandes extensiones de tierra, sin embargo desde su clasificación al obtenerse desde las imagenes satélites y las reflectancias 'NDVI' ellos consiguen diferenciar dentro de una zona urbana como puede ser málaga capital los parques.

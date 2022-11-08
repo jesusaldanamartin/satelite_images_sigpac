@@ -1,0 +1,106 @@
+{
+    "style_sheet": {
+        "SIGPAC_code": {
+            "1": [
+                "water",
+                "wetland"
+            ],
+            "2": [
+                "builtup",
+                "baresoil"
+            ],
+            "3": [
+                "cropland"
+            ],
+            "4": [
+                "cropland"
+            ],
+            "5": [
+                "cropland"
+            ],
+            "6": [
+                "cropland"
+            ],
+            "7": [
+                "builtup"
+            ],
+            "8": [
+                "shrubland",
+                "hervaceousvegatation"
+            ],
+            "9": [
+                "cropland"
+            ],
+            "10": [
+                "cropland"
+            ],
+            "11": [
+                "closedforest"
+            ],
+            "12": [
+                "cropland"
+            ],
+            "13": [
+                "cropland"
+            ],
+            "14": [
+                "cropland"
+            ],
+            "15": [
+                "builtup",
+                "baresoil"
+            ],
+            "16": [
+                "builtup",
+                "cropland"
+            ],
+            "17": [
+                "cropland"
+            ],
+            "18": [
+                "cropland"
+            ],
+            "19": [
+                "cropland"
+            ],
+            "20": [
+                "shrubland",
+                "hervaceousvegatation",
+                "openforest"
+            ],
+            "21": [
+                "shrubland",
+                "hervaceousvegatation"
+            ],
+            "22": [
+                "hervaceousvegatation"
+            ],
+            "23": [
+                "cropland"
+            ],
+            "24": [
+                "cropland"
+            ],
+            "25": [
+                "cropland"
+            ],
+            "26": [
+                "cropland"
+            ],
+            "27": [
+                "cropland"
+            ],
+            "28": [
+                "builtup",
+                "baresoil"
+            ],
+            "29": [
+                "builtup"
+            ],
+            "30": [
+                "builtup",
+                "baresoil"
+            ]
+        }
+    }
+}
