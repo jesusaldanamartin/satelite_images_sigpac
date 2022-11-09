@@ -167,3 +167,21 @@ Pensar como aplicar machine learning al sigpac.
 He creado unas hojas de estilo en condiciones para la comparacion y para el sigpac.
 
 He cambiado el json aplicandole a los cultivos frutales, olivares y mezclas de estos tipos (aquellos árboreos con tronco y copa) les he dado las caracteristicas de openforest, closedforest y cropland. 
+
+## 09/11/2022
+
+Descargando una imagen con una resolución de 0.5m desde el CNIG. Compruebo junto a esa imagen y la true color el sigpac con su classification. Donde más diferencias hay respecto a los croplands es en todos los cod_uso de olivares, frutales etc.. 
+
+Voy a realizar ahora una máscara de granada y dejarlo ya en segundo plano en la mv. Y continuaré pensando casos de uso.
+
+Sacar recortes y ejemplos visuales con los que mostrar los resultados.
+
+
+APLICAR ML PASOS (MEDIUM PAPER):
+
+Descargar una imagen no muy grande del CNIG.
+Cropearla por un municipio chico de SIGPAC o incluso por alguna parcela directamente.
+ABRIRLA CON RASTERIO/GDAL y clasificarla segun su NDVI en diferentes clases.
+Utilizar keras/pytorch/tensorflow para aumentar muestras de la imagen.
+Aplicar DL o ML como svm, rf etc...
+Comparar resultado con mis datos de SIGPAC y con la clasificación de sentinel del lab.
