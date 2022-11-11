@@ -184,7 +184,11 @@ Cropearla por un municipio chico de SIGPAC o incluso por alguna parcela directam
 ABRIRLA CON RASTERIO/GDAL y clasificarla segun su NDVI en diferentes clases.
 Utilizar keras/pytorch/tensorflow para aumentar muestras de la imagen.
 Aplicar DL o ML como svm, rf etc...
+<<<<<<< HEAD
 Comparar resultado con mis datos de SIGPAC y con la clasificación de sentinel del lab.
 
 ## 11/11/2022
 
+=======
+Comparar resultado con mis datos de SIGPAC y con la clasificación de sentinel del lab.
+>>>>>>> b1696a7f26c1af3135ce459887d4ce74a4734c2a

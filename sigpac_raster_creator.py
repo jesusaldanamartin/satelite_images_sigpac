@@ -29,6 +29,10 @@ from os import listdir
 from os.path import isfile, join
 import warnings
 
+from osgeo import gdal
+from osgeo import ogr
+from osgeo import gdalconst
+
 warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
 
@@ -47,13 +51,6 @@ TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH',
     '27RYL', '29TQH', '31TCG', '27RYN', '30TXM', '31TDG', '30TUN', '30TVM', '31TFE',
     '30TWM', '29TNG', '29THN', '29TNJ', '29TPJ', '29TQJ', '30TPU', '30TVP', '30TWP',
     '30TVN', '30TWN', '30TXN', '30TYN', '31TCH' ]
-
-# sat_folder_files = os.listdir("C:\TFG_resources\satelite_img")
-# for img in sat_folder_files:
-#     cod = img.split("_")[1]
-#     cod = cod.split(".")[0]
-#     if cod not in TILES:
-#         print(cod)
 
 def get_id_codigo_uso(key: str) -> None:
     '''Raster bands cannot have string value so each cod_uso it is been replaced with an id.
@@ -187,7 +184,7 @@ def merge_tiff_images(output_name: str, folder_path: str):
         "height": mosaic.shape[1],
         "width": mosaic.shape[2],
         "transform": out_trans,
-        "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs "
+        "crs": "+proj=utm +zone=29 +ellps=WGS84 +units=m +no_defs "
         }
         )
     try:
@@ -480,3 +477,50 @@ def apply_style_sheet_to_raster():
         dst.write(new_raster_output, 1)
 
 # apply_style_sheet_to_raster()
+
+
+
+#! ||||||||||||||||||||||||||||||||||||||||||||
+#! ||||||||||||||||||||||||||||||||||||||||||||
+#! ||||||||||||||||||||||||||||||||||||||||||||
+#! ||||||||||||||||||||||||||||||||||||||||||||
+#! ||||||||||||||||||||||||||||||||||||||||||||
+
+
+# ecw_file = gdal.Info("C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw")
+# tranls = gdal.Translate(ecw_file)
+# print(tranls)
+# print(ecw_file)
+
+# data = gdal.Open()
+# geo_transform = data.GetGeoTransform()
+# source_layer = data.GetLayer()
+# print(geo_transform)
+# print(source_layer)
+# print(data)
+
+
+# ndsm = 'C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw'
+# shp = 'C:\TFG_resources\shape_files\Malaga_Municipios_Separados\SP20_REC_29012.shp'
+# data = gdal.Open(ndsm, gdalconst.GA_ReadOnly)
+# geo_transform = data.GetGeoTransform()
+# source_layer = data.GetLayer()
+# x_min = geo_transform[0]
+# y_max = geo_transform[3]
+# x_max = x_min + geo_transform[1] * data.RasterXSize
+# y_min = y_max + geo_transform[5] * data.RasterYSize
+# x_res = data.RasterXSize
+# y_res = data.RasterYSize
+# mb_v = ogr.Open(shp)
+# mb_l = mb_v.GetLayer()
+# pixel_width = geo_transform[1]
+# output = 'C:\TFG_resources\satelite_images_sigpac\output'
+# target_ds = gdal.GetDriverByName('GTiff').Create(output, x_res, y_res, 1, gdal.GDT_Byte)
+# target_ds.SetGeoTransform((x_min, pixel_width, 0, y_min, 0, pixel_width))
+# band = target_ds.GetRasterBand(1)
+# NoData_value = -999999
+# band.SetNoDataValue(NoData_value)
+# band.FlushCache()
+# gdal.RasterizeLayer(target_ds, [1], mb_l, options=["ATTRIBUTE=hedgerow"])
+
+# target_ds = None
