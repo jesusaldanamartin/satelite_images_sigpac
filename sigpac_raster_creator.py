@@ -28,10 +28,11 @@ import json
 from os import listdir
 from os.path import isfile, join
 import warnings
+from matplotlib import pyplot as plt
 
-from osgeo import gdal
-from osgeo import ogr
-from osgeo import gdalconst
+# from osgeo import gdal
+# from osgeo import ogr
+# from osgeo import gdalconst
 
 warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
@@ -124,9 +125,9 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
 #          "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif", 
 #         "malagaMasked.tif")
 
-# mask_shp("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/CADIZ/",
-#          "C:\TFG_resources\satelite_images_sigpac\malagaMask_sigpac.tif", 
-#         "malagaMasked.tif")
+# mask_shp("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/ALMERIA/",
+#          "/home/jesus/Documents/satelite_images_sigpac/results/spain30S.tif", 
+#         "almeriaMasked.tif")
 
 def masked_all_shapefiles_in_directory(folder_path: str):
     '''Read all shapefiles stored in directory and create a mask for each file.
@@ -138,7 +139,7 @@ def masked_all_shapefiles_in_directory(folder_path: str):
         A file is created for each shp in folder.
     '''
 
-    path_masked_images = "/home/jesus/Documents/satelite_images_sigpac/masked_shp/CORDOBA/"
+    path_masked_images = "/home/jesus/Documents/satelite_images_sigpac/masked_shp/ALMERIA/"
     path_tif_image = "/home/jesus/Documents/satelite_images_sigpac/results/spain30S.tif"
 
     folder_files = os.listdir(folder_path)
@@ -147,13 +148,13 @@ def masked_all_shapefiles_in_directory(folder_path: str):
         file_number = file.split('.')[0]
         if extension == 'shp':
             try:
-                mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"14{file_number[-3:]}_masked.tif")
+                mask_shp(folder_path+f"/{file}", path_tif_image, path_masked_images+f"04{file_number[-3:]}_masked.tif")
             except ValueError:
                 print(file+" does not overlap figure")
 
     return "CORDOBA FINISHED"
 
-# masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/CORDOBA")
+# masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/ALMERIA")
 
 
 def merge_tiff_images(output_name: str, folder_path: str):
@@ -184,7 +185,7 @@ def merge_tiff_images(output_name: str, folder_path: str):
         "height": mosaic.shape[1],
         "width": mosaic.shape[2],
         "transform": out_trans,
-        "crs": "+proj=utm +zone=29 +ellps=WGS84 +units=m +no_defs "
+        "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs "
         }
         )
     try:
@@ -195,8 +196,8 @@ def merge_tiff_images(output_name: str, folder_path: str):
         pass
     return mosaic
 
-# merge_tiff_images("cordoba_mask.tif",
-#                   "/home/jesus/Documents/satelite_images_sigpac/masked_shp/CORDOBA")
+# merge_tiff_images("almeriaMasked.tif",
+#                   "/home/jesus/Documents/satelite_images_sigpac/masked_shp/ALMERIA")
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -338,9 +339,9 @@ def save_output_file(tif_path: str, shp_path: str,output_name: str):
         with rasterio.open(output_name, 'w', **profile) as dst:
             dst.write(arr, 1)
 
-save_output_file("/home/jesus/Documents/satelite_images_sigpac/results/cordoba_mask.tif",
-                "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/V1_01_SP21_REC_PROV_14/SP21_REC_14.shp",
-                "cordoba_masked_sigpac.tif")
+# save_output_file("/home/jesus/Documents/satelite_images_sigpac/results/cordoba_mask.tif",
+#                 "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/V1_01_SP21_REC_PROV_14/SP21_REC_14.shp",
+#                 "cordoba_masked_sigpac.tif")
 
 def read_masked_files(folder_path):
     '''For every masked file in folder save_output_file() function is called 
@@ -440,7 +441,7 @@ def raster_comparison_cropland(rows,cols, new_raster_output, style_sheet, sigpac
                         new_raster_output[x,y] = 22 #* diff band value:
                     else:
                         # print("tmb")
-                        new_raster_output[x,y] = 0
+                        new_raster_output[x,y] = 23
                 
     except IndexError:
         pass
@@ -457,13 +458,13 @@ def apply_style_sheet_to_raster():
         dict_json = json.load(jfile)
         style_sheet = dict_json['style_sheet']['SIGPAC_code']
     
-    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/granadaMask_sigpac.tif") as src:
+    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif") as src:
         sigpac_band = src.read(1) 
         # ar_unique = np.unique(sigpac_band)
         rows = sigpac_band.shape[0] #* 10654
         cols = sigpac_band.shape[1] #* 16555
 
-    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/granadaMask.tif") as src:
+    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMasked.tif") as src:
         classification_band = src.read(1) 
         arr = src.read(1)
         profile = src.profile #* raster metadata
@@ -473,11 +474,74 @@ def apply_style_sheet_to_raster():
 
     new_raster_output = raster_comparison_cropland(rows, cols, arr, style_sheet, sigpac_band, classification_band)
 
-    with rasterio.open("raster_comparison__cropland_gra.tif", 'w', **profile) as dst:
+    with rasterio.open("raster_comparison_malaga.tif", 'w', **profile) as dst:
         dst.write(new_raster_output, 1)
 
 # apply_style_sheet_to_raster()
 
+
+#TODO AUTOMATIZAR VALIDACIÓN DE PROVINCIAS
+
+#*  TP  Banda numero 20(verde) coinciden SGP y SAT
+#*  TN  sin datos
+#*Banda numero 21(rojo)  SAT cropland SGP no
+#*  FP  ROJO 
+#*  FN  Banda numero 22(azul)  SGP cropland SAT no
+
+#* Banda numero 23 todo lo que no es croplad
+
+def validation():
+    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/raster_comparison_malaga.tif") as src:
+        band_matrix = src.read()
+        # print(band_matrix)
+        # rows = band_matrix.shape[0] #* 10654
+        # cols = band_matrix.shape[1] #* 16555
+        # print(rows) #13803
+        # print(cols) #17258
+
+        green = np.where(band_matrix==20)
+        red = np.where(band_matrix==21)
+        blue = np.where(band_matrix==22)
+        black = np.where(band_matrix==23)
+        white = np.where(band_matrix==0)
+
+        tp = len(green[0]) + len(green[1]) + len(green[2])
+        tn = len(black[0]) + len(black[1]) + len(black[2])
+        fp = len(red[0]) + len(red[1]) + len(red[2])
+        fn = len(blue[0]) + len(blue[1]) + len(blue[2])
+        na = len(white[0]) + len(white[1]) + len(white[2])
+
+        print("---")
+        print(na)
+        print(tp)
+        print(tn)
+        print(fp)
+        print(fn)
+        print("---")
+
+        print("Numero total de pixeles cropland ",tp+tn+fp+tn)
+        print("Numero total de pixeles na ",na)
+
+        accuracy = (tp+tn)/(tp+tn+fp+tn)
+        precision = tp/(tp+fp)
+        recall = tp/(tp+fn)
+        f1_score = 2/((1/precision)+(1/recall))
+        sensitivity = tp/(tp+fn)
+        specificity = fp/(fp+tn)
+        tp_rate = sensitivity
+        fp_rate = 1-specificity
+     
+        
+        print("Accuracy: ",accuracy)
+        print("Precision: ",precision)
+        print("Recall: ",recall)
+        print("F1-Score:",f1_score)
+        print("TruePositiveRate: ",tp_rate)
+        print("FalsePositiveRate: ",fp_rate)
+        plt.plot(fp_rate,tp_rate)
+        plt.show()
+
+validation()
 
 
 #! ||||||||||||||||||||||||||||||||||||||||||||

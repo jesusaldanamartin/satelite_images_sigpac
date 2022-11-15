@@ -176,7 +176,6 @@ Voy a realizar ahora una máscara de granada y dejarlo ya en segundo plano en la
 
 Sacar recortes y ejemplos visuales con los que mostrar los resultados.
 
-
 APLICAR ML PASOS (MEDIUM PAPER):
 
 Descargar una imagen no muy grande del CNIG.
@@ -184,11 +183,44 @@ Cropearla por un municipio chico de SIGPAC o incluso por alguna parcela directam
 ABRIRLA CON RASTERIO/GDAL y clasificarla segun su NDVI en diferentes clases.
 Utilizar keras/pytorch/tensorflow para aumentar muestras de la imagen.
 Aplicar DL o ML como svm, rf etc...
-<<<<<<< HEAD
 Comparar resultado con mis datos de SIGPAC y con la clasificación de sentinel del lab.
 
 ## 11/11/2022
 
-=======
-Comparar resultado con mis datos de SIGPAC y con la clasificación de sentinel del lab.
->>>>>>> b1696a7f26c1af3135ce459887d4ce74a4734c2a
+Caso de uso 1 : Comparar resultados del classification del lab con el mio de SIGPAC con el objetivo de verificar sus resultados (considerando que los datos sigpac se sacan 'a mano')
+
+Caso de uso 2 :
+
+Descargar del CNIG las ortofotos del SIGPAC que haya (la mayoría son de entre el 2000 y 2010) y comparar de alguna forma esa fotos con lo mio y ver el crecimiento de cultivo/urbano/reservas de agua que ha habido en 10/20 años.
+
+Caso de uso 3 :
+
+Aplicar ML o DL a las imagenes antiguas de SIGPAC del CNIG y reconocer objetos o clasificarlas a nivel de pixel (como tienen ellos).
+
+Caso de uso 4 :
+
+
+## 15/11/2022
+
+Obtener matriz de confusión para mis cropland_comparison y conseguir validar de forma automática las provincias.
+A futuro una vez compruebe que lo hace correctamente investigar Francia, Reino Unido, Italia y buscar algo parecido al SIGPAC que tengan allí y aplicarle mi código y mi comparación para validar de forma automática land cover.
+
+### CÓRDOBA
+Numero total de pixeles cropland  466569519
+Numero total de pixeles na  301943910
+Accuracy:  0.6093172173126895
+Precision:  0.940783870343585
+Recall:  0.47245900466249285
+F1-Score: 0.6290239545458828
+TruePositiveRate:  0.47245900466249285
+FalsePositiveRate:  0.03759054484096224
+
+### MÁLAGA
+Numero total de pixeles cropland  293280990
+Numero total de pixeles na  311319207
+Accuracy:  0.571572589822477
+Precision:  0.8285276094359566
+Recall:  0.5805527459786458
+F1-Score: 0.6827204380911815
+TruePositiveRate:  0.5805527459786458
+FalsePositiveRate:  0.08719504631987929

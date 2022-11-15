@@ -2,7 +2,6 @@ GeoJson_Data
 Shapefile_Data
 Satelite_Images
 masked_shp
-masked_sigpac
 .env
 *.aux
 *.aux.xml
