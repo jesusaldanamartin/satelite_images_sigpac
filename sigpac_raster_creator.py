@@ -369,29 +369,27 @@ def read_masked_files(folder_path):
             print("")
             print(file+" finished")
 
-
 # read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/CORDOBA/")
 
-#!---------------------------
-#!---------------------------
-#!---------------------------
-#!---------------------------
-#!---------------------------
-#!---------------------------
-#!---------------------------
+#!---------------------------------------------------------------------------------------------------------------------------------------
 
-def raster_comparison(rows,cols, new_raster_output, style_sheet, sigpac_band, classification_band):
+def raster_comparison(rows: int,cols: int, new_raster_output: np.ndarray, 
+    style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray) -> np.ndarray:
     '''This function compares the band values of two different raster. These values 
-    are linked with the style_sheet.json file. Both rasters must have the same size.
+    are linked with the crop_style_sheet.json file. Both rasters must have the same size.
 
     Args:
         rows (int): Number of rows.
         cols (int): Number of columns.
         new_raster_output (np.ndarray): 2D numpy array copy of our input raster.
-        style_sheet (dict): Path
+        style_sheet (dict): Path to the json file.
+        sigpac_band (ndarray): Sigpac raster band read with rasterio.
+        classification_band (ndarray): Lab raster band read with rasterio.
 
 
     Returns:
+        This function returns a ndarray where band values have been replaced with 
+        the new compared values.
     '''
 
     try:
@@ -419,7 +417,24 @@ def raster_comparison(rows,cols, new_raster_output, style_sheet, sigpac_band, cl
         pass
     return new_raster_output
 
-def raster_comparison_cropland(rows,cols, new_raster_output, style_sheet, sigpac_band, classification_band):
+def raster_comparison_cropland(rows: int,cols: int, new_raster_output: np.ndarray, 
+    style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray) -> np.ndarray:
+    '''This function compares the crop zones in both land covers given by parameters.
+    These values are linked with the id_style_sheet.json file. Both rasters must have the same size.
+
+    Args:
+        rows (int): Number of rows.
+        cols (int): Number of columns.
+        new_raster_output (np.ndarray): 2D numpy array copy of our input raster.
+        style_sheet (dict): Path to the json file.
+        sigpac_band (ndarray): Sigpac raster band read with rasterio.
+        classification_band (ndarray): Lab raster band read with rasterio.
+
+
+    Returns:
+        This function returns a ndarray matrix where band values have been replaced with 
+        the new compared values.
+    '''
 
     try:
         for x in tqdm(range(rows)):
@@ -430,45 +445,46 @@ def raster_comparison_cropland(rows,cols, new_raster_output, style_sheet, sigpac
                     if style_sheet[str(sigpac_band[x,y])] == 6 and classification_band[x,y] == 6:
                         if style_sheet[str(sigpac_band[x,y])] == classification_band[x,y]:
                             # print("VERDE")
-                            new_raster_output[x,y] = 20 #* same band value
+                            new_raster_output[x,y] = 20 #*True Positives
 
                     elif classification_band[x,y] == 6 and style_sheet[str(sigpac_band[x,y])] != 6:
                         # print("ROJO")
-                        new_raster_output[x,y] = 21 #* diff band value:
+                        new_raster_output[x,y] = 21 #* False Positive
 
                     elif classification_band[x,y] != 6 and style_sheet[str(sigpac_band[x,y])] == 6:
                         # print("AZUL")
-                        new_raster_output[x,y] = 22 #* diff band value:
+                        new_raster_output[x,y] = 22 #* False Negatives
                     else:
-                        # print("tmb")
-                        new_raster_output[x,y] = 23
-                
+                        # print("NEGRO")
+                        new_raster_output[x,y] = 23 #* True Negatives
     except IndexError:
         pass
     return new_raster_output
 
-def apply_style_sheet_to_raster():
-    '''For blablablablabla
+def apply_style_sheet_to_raster(json_path: str, sigpac_path: str, masked_path: str):
+    '''Read all files needed and call function raster_comparison_cropland() to compare both rasters.
 
     Args:
+        json_path (str): Path to the json file.
+        sigpac_path (str): Path to the sigpac processed raster.
+        masked_path (str): Path to the classification raster (LAB).
 
     Returns:
+
     '''
-    with open('id_style_sheet.json') as jfile:
+    with open(json_path) as jfile:
         dict_json = json.load(jfile)
         style_sheet = dict_json['style_sheet']['SIGPAC_code']
     
-    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif") as src:
+    with rasterio.open(sigpac_path) as src:
         sigpac_band = src.read(1) 
-        # ar_unique = np.unique(sigpac_band)
         rows = sigpac_band.shape[0] #* 10654
         cols = sigpac_band.shape[1] #* 16555
 
-    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMasked.tif") as src:
+    with rasterio.open(masked_path) as src:
         classification_band = src.read(1) 
         arr = src.read(1)
         profile = src.profile #* raster metadata
-        # ar_unique = np.unique(classification_band)
         rows = classification_band.shape[0] #* 10654
         cols = classification_band.shape[1] #* 16555
 
@@ -477,27 +493,41 @@ def apply_style_sheet_to_raster():
     with rasterio.open("raster_comparison_malaga.tif", 'w', **profile) as dst:
         dst.write(new_raster_output, 1)
 
-# apply_style_sheet_to_raster()
-
+apply_style_sheet_to_raster("id_style_sheet.json",
+    "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif",
+    "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMasked.tif")
 
 #TODO AUTOMATIZAR VALIDACIÓN DE PROVINCIAS
 
 #*  TP  Banda numero 20(verde) coinciden SGP y SAT
-#*  TN  sin datos
-#*Banda numero 21(rojo)  SAT cropland SGP no
-#*  FP  ROJO 
-#*  FN  Banda numero 22(azul)  SGP cropland SAT no
+#*  TN  Banda numero 23(negro)  SAT cropland SGP no
+#*  FP  Banda numero 21(rojo)  No cropland n
+#*  FN  Banda numero 22(azul)  SGP cropland SAT ni en SAT ni SG
 
-#* Banda numero 23 todo lo que no es croplad
+# "/home/jesus/Documents/satelite_images_sigpac/raster_comparison_malaga.tif"
+def validation(path: str) -> float:
+    '''With a given compared raster, create a 2x2 confusion matrix 
+    to validate the lab raster's performance crop classification.
 
-def validation():
-    with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/raster_comparison_malaga.tif") as src:
+    Args:
+        path (str): Raster we want to work with.
+
+    Returns:
+        This function writes in the terminal the metrics.
+        #TODO:
+    '''
+
+    with rasterio.open(path) as src:
         band_matrix = src.read()
         # print(band_matrix)
         # rows = band_matrix.shape[0] #* 10654
         # cols = band_matrix.shape[1] #* 16555
         # print(rows) #13803
         # print(cols) #17258
+        print(len(band_matrix[0]))
+        print(len(band_matrix))
+        print(len(band_matrix[0][10]))
+
 
         green = np.where(band_matrix==20)
         red = np.where(band_matrix==21)
@@ -505,22 +535,26 @@ def validation():
         black = np.where(band_matrix==23)
         white = np.where(band_matrix==0)
 
+        print(green)
+        print(len(green))
+        print(len(green[0]))
+
         tp = len(green[0]) + len(green[1]) + len(green[2])
         tn = len(black[0]) + len(black[1]) + len(black[2])
         fp = len(red[0]) + len(red[1]) + len(red[2])
         fn = len(blue[0]) + len(blue[1]) + len(blue[2])
         na = len(white[0]) + len(white[1]) + len(white[2])
 
-        print("---")
-        print(na)
-        print(tp)
-        print(tn)
-        print(fp)
-        print(fn)
-        print("---")
+        # print("---")
+        # print("Not Available: ",na)
+        # print("True Positive: ",tp)
+        # print("True Negative: ",tn)
+        # print("False Positive: ",fp)
+        # print("False Negative:",fn)
+        # print("---")
 
-        print("Numero total de pixeles cropland ",tp+tn+fp+tn)
-        print("Numero total de pixeles na ",na)
+        # print("Numero total de pixeles cropland ",tp+tn+fp+tn)
+        # print("Numero total de pixeles na ",na)
 
         accuracy = (tp+tn)/(tp+tn+fp+tn)
         precision = tp/(tp+fp)
@@ -530,26 +564,35 @@ def validation():
         specificity = fp/(fp+tn)
         tp_rate = sensitivity
         fp_rate = 1-specificity
-     
-        
+
         print("Accuracy: ",accuracy)
         print("Precision: ",precision)
         print("Recall: ",recall)
         print("F1-Score:",f1_score)
         print("TruePositiveRate: ",tp_rate)
         print("FalsePositiveRate: ",fp_rate)
-        plt.plot(fp_rate,tp_rate)
-        plt.show()
 
-validation()
+    return fp_rate, tp_rate
 
+x,y = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\malaga\\raster_comparison_malaga.tif")
+# x2,y2 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_cordoba2.tif")
+# x3,y3 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_granada.tif")
 
-#! ||||||||||||||||||||||||||||||||||||||||||||
-#! ||||||||||||||||||||||||||||||||||||||||||||
-#! ||||||||||||||||||||||||||||||||||||||||||||
-#! ||||||||||||||||||||||||||||||||||||||||||||
-#! ||||||||||||||||||||||||||||||||||||||||||||
+plt.plot(x,y,'o')
+# plt.plot(x2,y2,'o')
+# plt.plot(x3,y3,'o')
+plt.xlim((0,1))
+plt.ylim((0,1))
+plt.show()
 
+#TODO SOLUCIONAR PATHS A DIRECTORIOS CON JSON/MINIO
+#TODO TERMINAR ANDALUCIA COMPLETA Y MÉTRICAS
+#TODO
+
+# ypoints = np.array([0, y, y2, y3])
+# plt.plot(ypoints, linestyle = 'dotted')
+
+#!---------------------------------------------------------------------------------------------------------------------------------------
 
 # ecw_file = gdal.Info("C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw")
 # tranls = gdal.Translate(ecw_file)
@@ -562,7 +605,6 @@ validation()
 # print(geo_transform)
 # print(source_layer)
 # print(data)
-
 
 # ndsm = 'C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw'
 # shp = 'C:\TFG_resources\shape_files\Malaga_Municipios_Separados\SP20_REC_29012.shp'

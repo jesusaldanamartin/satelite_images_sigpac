@@ -224,3 +224,25 @@ Recall:  0.5805527459786458
 F1-Score: 0.6827204380911815
 TruePositiveRate:  0.5805527459786458
 FalsePositiveRate:  0.08719504631987929
+
+### GRANADA
+
+Numero total de pixeles cropland  492346851
+Numero total de pixeles na  493728465
+Accuracy:  0.5711207788348381
+Precision:  0.8799771975211826
+Recall:  0.49898427819142355
+F1-Score: 0.6368485189234282
+TruePositiveRate:  0.49898427819142355
+FalsePositiveRate:  0.9476197307927746
+
+¿el objetivo es validar la cantidad de cropland en un land cover?
+
+¿el objetivo es validar la calidad de las predicciones?
+
+## 17/11/2022
+
+No hay wifi.
+Terminando docstrings de las nuevas funciones.
+TODO:
+-   Echar un vistazo a todo el código y corregir erratas y tratar de optimizar paths. ( No tiene sentido llamar constantemente a los paths absolutos de los ficheros. Quizas gurdar todos los path en un único json de enlace e ir constantemente actualizando ese json ) Subir a minio personal de forma automática.
