@@ -493,9 +493,9 @@ def apply_style_sheet_to_raster(json_path: str, sigpac_path: str, masked_path: s
     with rasterio.open("raster_comparison_malaga.tif", 'w', **profile) as dst:
         dst.write(new_raster_output, 1)
 
-apply_style_sheet_to_raster("id_style_sheet.json",
-    "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif",
-    "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMasked.tif")
+# apply_style_sheet_to_raster("id_style_sheet.json",
+#     "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif",
+#     "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMasked.tif")
 
 #TODO AUTOMATIZAR VALIDACIÓN DE PROVINCIAS
 
@@ -524,10 +524,9 @@ def validation(path: str) -> float:
         # cols = band_matrix.shape[1] #* 16555
         # print(rows) #13803
         # print(cols) #17258
-        print(len(band_matrix[0]))
-        print(len(band_matrix))
-        print(len(band_matrix[0][10]))
-
+        # print(len(band_matrix[0]))
+        # print(len(band_matrix))
+        # print(len(band_matrix[0][10]))
 
         green = np.where(band_matrix==20)
         red = np.where(band_matrix==21)
@@ -535,15 +534,26 @@ def validation(path: str) -> float:
         black = np.where(band_matrix==23)
         white = np.where(band_matrix==0)
 
-        print(green)
-        print(len(green))
-        print(len(green[0]))
+        # tp = len(green[0]) + len(green[1]) + len(green[2])
+        # tn = len(black[0]) + len(black[1]) + len(black[2])
+        # fp = len(red[0]) + len(red[1]) + len(red[2])
+        # fn = len(blue[0]) + len(blue[1]) + len(blue[2])
+        # na = len(white[0]) + len(white[1]) + len(white[2])
 
-        tp = len(green[0]) + len(green[1]) + len(green[2])
-        tn = len(black[0]) + len(black[1]) + len(black[2])
-        fp = len(red[0]) + len(red[1]) + len(red[2])
-        fn = len(blue[0]) + len(blue[1]) + len(blue[2])
-        na = len(white[0]) + len(white[1]) + len(white[2])
+        tp = len(band_matrix[green])
+        tn = len(band_matrix[black])
+        fp = len(band_matrix[red])
+        fn = len(band_matrix[blue])
+        na = len(band_matrix[white])
+
+        print(tp)
+        print(tn)
+        print(fp)
+        print(fn)
+        print(na)
+        print("-----------------")
+        # print(len(band_matrix[green]))
+        # print(band_matrix[green])
 
         # print("---")
         # print("Not Available: ",na)
@@ -571,23 +581,28 @@ def validation(path: str) -> float:
         print("F1-Score:",f1_score)
         print("TruePositiveRate: ",tp_rate)
         print("FalsePositiveRate: ",fp_rate)
+        print("-------------------------")
 
     return fp_rate, tp_rate
 
 x,y = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\malaga\\raster_comparison_malaga.tif")
-# x2,y2 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_cordoba2.tif")
-# x3,y3 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_granada.tif")
+x2,y2 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_cordoba2.tif")
+x3,y3 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_granada.tif")
+x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\\raster_comparison_sevilla.tif")
 
-plt.plot(x,y,'o')
+# plt.plot(x,y,'o')
 # plt.plot(x2,y2,'o')
 # plt.plot(x3,y3,'o')
-plt.xlim((0,1))
-plt.ylim((0,1))
-plt.show()
+# plt.plot(x4,y4,'o')
+# plt.xlim((0,1))
+# plt.ylim((0,1))
+# plt.xlabel('False Positive Rate')
+# plt.ylabel('True Positive Rate')
+# plt.show()
 
 #TODO SOLUCIONAR PATHS A DIRECTORIOS CON JSON/MINIO
 #TODO TERMINAR ANDALUCIA COMPLETA Y MÉTRICAS
-#TODO
+#TODO MIRAR SI ES VIABLE HACER UK
 
 # ypoints = np.array([0, y, y2, y3])
 # plt.plot(ypoints, linestyle = 'dotted')
@@ -630,3 +645,40 @@ plt.show()
 # gdal.RasterizeLayer(target_ds, [1], mb_l, options=["ATTRIBUTE=hedgerow"])
 
 # target_ds = None
+
+
+
+
+def prueba_de_uk():
+
+
+    with fiona.open("C:\TFG_resources\RPA_CropMapOfEngland2020CAM_SHP_Full\data\Crop_Map_of_England_2020_Cambridgeshire.shp", "r") as json_cambridge:
+        print(json_cambridge)
+        # shapes = [feature["geometry"] for feature in json_cambridge]
+        for feature in json_cambridge:
+            print(feature['properties'])
+
+            # print(feature["geometry"])
+        # print(shapes)
+
+
+
+# prueba_de_uk()
+
+
+def prueba_corine_tiff():
+
+  with rasterio.open("C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
+    band = src.read()
+    print(band)
+    rows = band.shape[0] #* 16555
+    cols = band.shape[1] #* 16555
+    print(rows)
+    print(cols)
+    print(len(band[0][900]))
+    pink = np.where(band==40)
+    print(pink)
+    crop = len(pink[0]) + len(pink[1]) + len(pink[2])
+    print(crop)
+
+# prueba_corine_tiff()

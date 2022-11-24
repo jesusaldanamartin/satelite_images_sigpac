@@ -246,3 +246,35 @@ No hay wifi.
 Terminando docstrings de las nuevas funciones.
 TODO:
 -   Echar un vistazo a todo el código y corregir erratas y tratar de optimizar paths. ( No tiene sentido llamar constantemente a los paths absolutos de los ficheros. Quizas gurdar todos los path en un único json de enlace e ir constantemente actualizando ese json ) Subir a minio personal de forma automática.
+
+## 18/11/2022
+
+### SEVILLA
+
+Accuracy:  0.6553289791630915
+Precision:  0.9069471501362908        
+Recall:  0.6992653081063409
+F1-Score: 0.7896796904067104
+TruePositiveRate:  0.6992653081063409 
+FalsePositiveRate:  0.8969520433226819
+
+NOTAS AM:
+
+TP OLIVOS no interesan porque no son olivos pero puden ser cualquier tipo de crop.
+
+FP OLIVOS no sabemos si cropland  entonces no son olivos (SI)
+
+FN SI
+
+TN 
+
+### 24/11/2022
+
+Notas papel AM:
+
+TN: No cropland y no olivo / No importante
+FP: Cropland no olivo / No importante
+FN: Fallo seguro / Importante
+TP: Acierto seguro / Importante
+
+Métrica posible -> TP/(TP + FN) = % de olivs bien clasificados
