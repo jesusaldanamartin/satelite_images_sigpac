@@ -242,7 +242,7 @@ FalsePositiveRate:  0.9476197307927746
 
 ## 17/11/2022
 
-No hay wifi.
+No hay wifi. xd
 Terminando docstrings de las nuevas funciones.
 TODO:
 -   Echar un vistazo a todo el código y corregir erratas y tratar de optimizar paths. ( No tiene sentido llamar constantemente a los paths absolutos de los ficheros. Quizas gurdar todos los path en un único json de enlace e ir constantemente actualizando ese json ) Subir a minio personal de forma automática.
@@ -278,3 +278,8 @@ FN: Fallo seguro / Importante
 TP: Acierto seguro / Importante
 
 Métrica posible -> TP/(TP + FN) = % de olivs bien clasificados
+
+¿representar los olivos respecto a su clase forest o crop?
+¿reino unido CROVE comparar con corine?, ¿viable?
+
+Función terminadad para obtener el porcentaje de acierto de cada clase de cultivo. Guardando cada una por separado en formato csv par luego combinarlas y sacar medias o lo que sea (estudio por clases de cultivo), dejando puesto huelva en segundo plano antes de irme. Una vez terminado toda andalucia en sigpac raster y en métricas. Probar con Reino Unido aplicando mis mismas funciones.

@@ -6,6 +6,7 @@ masked_shp
 *.aux
 *.aux.xml
 __pycache__
+UK_CORINE
 updated_classification
 results
 *.tif

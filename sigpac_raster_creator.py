@@ -20,6 +20,7 @@ import fiona
 import numpy as np
 from multiprocessing import Process, Manager
 import threading
+from itertools import zip_longest
 
 from typing import Any, List, Tuple, BinaryIO
 from pathlib import Path
@@ -154,10 +155,7 @@ def masked_all_shapefiles_in_directory(folder_path: str):
 
     return "CORDOBA FINISHED"
 
-# masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/ALMERIA")
-
-
-def merge_tiff_images(output_name: str, folder_path: str):
+def merge_tiff_images_in_directory(output_name: str, folder_path: str):
     '''Merge all tiff images stored in folder_path.
 
     All metadata is saved and stored so the output will be be only a merge of all images given as input.
@@ -196,8 +194,6 @@ def merge_tiff_images(output_name: str, folder_path: str):
         pass
     return mosaic
 
-# merge_tiff_images("almeriaMasked.tif",
-#                   "/home/jesus/Documents/satelite_images_sigpac/masked_shp/ALMERIA")
 
 @jit
 def is_point_in_polygon(x: int, y: int, polygon: list) -> bool:
@@ -353,9 +349,11 @@ def read_masked_files(folder_path):
     Returns:
         One file for each shapefile.
     '''
+    masked_all_shapefiles_in_directory("/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/HUELVA")
+    # merge_tiff_images_in_directory("jaenMasked.tif", "/home/jesus/Documents/satelite_images_sigpac/masked_shp/JAEN")
 
-    path_shapefile_data = "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/CORDOBA/"
-    path_sigpac = "/home/jesus/Documents/satelite_images_sigpac/masked_sigpac/CORDOBA/"
+    path_shapefile_data = "/home/jesus/Documents/satelite_images_sigpac/Shapefile_Data/HUELVA/"
+    path_sigpac = "/home/jesus/Documents/satelite_images_sigpac/masked_sigpac/HUELVA/"
     folder_files = os.listdir(folder_path)
 
     for file in folder_files:
@@ -369,7 +367,7 @@ def read_masked_files(folder_path):
             print("")
             print(file+" finished")
 
-# read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/CORDOBA/")
+read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/HUELVA/")
 
 #!---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -398,7 +396,10 @@ def raster_comparison(rows: int,cols: int, new_raster_output: np.ndarray,
                 if sigpac_band[x,y] != 0 and classification_band[x,y] !=0:
                     if len(style_sheet[str(sigpac_band[x,y])]) > 1:
                         for item in style_sheet[str(sigpac_band[x,y])]:
-                            if classification_band[x,y] in style_sheet[str(sigpac_band[x,y])]:
+                            # print(item)
+                            # print(style_sheet[str(sigpac_band[x,y])])
+                            # print(classification_band[x,y])
+                            if classification_band[x,y] == item:
                                 # print("OK",":",item)
                                 new_raster_output[x,y] = 20 #* same band value
                             else:
@@ -461,6 +462,56 @@ def raster_comparison_cropland(rows: int,cols: int, new_raster_output: np.ndarra
         pass
     return new_raster_output
 
+def specific_class_raster_comparison(rows: int,cols: int, new_raster_output: np.ndarray, 
+    style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray) -> np.ndarray:
+    '''This function compares the crop zones in both land covers given by parameters.
+    These values are linked with the id_style_sheet.json file. Both rasters must have the same size.
+
+    Args:
+        rows (int): Number of rows.
+        cols (int): Number of columns.
+        new_raster_output (np.ndarray): 2D numpy array copy of our input raster.
+        style_sheet (dict): Path to the json file.
+        sigpac_band (ndarray): Sigpac raster band read with rasterio.
+        classification_band (ndarray): Lab raster band read with rasterio.
+
+
+    Returns:
+        This function returns a ndarray matrix where band values have been replaced with 
+        the new compared values.
+    '''
+
+    #! TP Acierto seguro (es olivo en sigpac y crop en classification)
+    #! FP Cropland no olivo (es cropland pero no mi clase concreta)
+    #! TN No cropland no olivo (no es cropland en classification ni olivo en SIGPAC)
+    #! FN Fallo seguro (No es ni cropland en sigpac ni forest en classification)
+    olive = [10,17,18,19,27]
+    try:
+        for x in tqdm(range(rows)):
+            for y in range(cols):
+                if sigpac_band[x,y] != 0 and classification_band[x,y] !=0:
+                    # print(style_sheet[str(sigpac_band[x,y])])
+                    # # print(classification_band[x,y])
+                    # print(sigpac_band[x,y])
+                    # print(style_sheet[str(sigpac_band[x,y])])
+                    if sigpac_band[x,y] == 19 and classification_band[x,y] == 6:
+                        # print("TP = VERDE")
+                        new_raster_output[x,y] = 20 #*True Positives
+
+                    elif classification_band[x,y] == 6 and (6 in style_sheet[str(sigpac_band[x,y])] and sigpac_band[x,y] != 19):
+                        # print("FP = ROJO")
+                        new_raster_output[x,y] = 21 #* False Positive
+
+                    elif classification_band[x,y] != 6 and (6 in style_sheet[str(sigpac_band[x,y])] and sigpac_band[x,y] == 19) :
+                        # print("FN = AZUL")
+                        new_raster_output[x,y] = 22 #* False Negatives
+                    else:
+                        # print("TN = NEGRO")
+                        new_raster_output[x,y] = 23 #* True Negatives
+    except IndexError:
+        pass
+    return new_raster_output
+
 def apply_style_sheet_to_raster(json_path: str, sigpac_path: str, masked_path: str):
     '''Read all files needed and call function raster_comparison_cropland() to compare both rasters.
 
@@ -488,21 +539,124 @@ def apply_style_sheet_to_raster(json_path: str, sigpac_path: str, masked_path: s
         rows = classification_band.shape[0] #* 10654
         cols = classification_band.shape[1] #* 16555
 
-    new_raster_output = raster_comparison_cropland(rows, cols, arr, style_sheet, sigpac_band, classification_band)
+    # new_raster_output = raster_comparison_cropland(rows, cols, arr, style_sheet, sigpac_band, classification_band)
 
-    with rasterio.open("raster_comparison_malaga.tif", 'w', **profile) as dst:
-        dst.write(new_raster_output, 1)
+    # with rasterio.open("FPandFN_raster_comparison_olive_jaen.tif", 'w', **profile) as dst:
+    #     dst.write(new_raster_output, 1)
 
-# apply_style_sheet_to_raster("id_style_sheet.json",
-#     "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif",
-#     "/home/jesus/Documents/satelite_images_sigpac/results/malaga/malagaMasked.tif")
+    return style_sheet, sigpac_band, classification_band
+
+style_sheet, sigpac_band, classification_band = apply_style_sheet_to_raster("json/olive_style_sheet.json",
+    "/home/jesus/Documents/satelite_images_sigpac/results/cordoba/cordobaMask_sigpac.tif",
+    "/home/jesus/Documents/satelite_images_sigpac/results/cordoba/cordoba_mask.tif")
 
 #TODO AUTOMATIZAR VALIDACIÓN DE PROVINCIAS
+
+
+def crops_hit_rate(style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray) -> np.ndarray:
+
+    flat_sigpac_band = sigpac_band.ravel()
+    flat_classification_band = classification_band.ravel()
+
+    sigpac_codes = {
+            "3": "" ,
+            "4": "",
+            "5": "",
+            "6": "",
+            "9": "",
+            "10":"",
+            "12":"",
+            "13":"",
+            "14":"",
+            "16":"",
+            "17":"",
+            "18":"",
+            "19":"",
+            "23":"",
+            "24":"",
+            "25":"",
+            "26":"",
+            "27":""
+    }
+
+    crop_codes = [3,4,5,6,9,10,12,13,14,16,17,18,19,23,24,25,26,27]
+    for crop_type in crop_codes:
+        tp = 0
+        fn = 0
+        print("Tipo crop", crop_type)
+        for index, (sigpac, classification) in tqdm(enumerate(zip_longest(flat_sigpac_band, flat_classification_band))):
+            # print(index)
+            # print(flat_sigpac_band[index])
+            # print(flat_classification_band[index])
+            if sigpac != 0 and classification !=0:
+                # print("SI")
+                # print(crop_type)
+                if sigpac == crop_type and classification == 6:
+                    tp+=1 #* TRUE POSITIVE
+                    # print("TP",tp)
+                elif classification != 6 and (6 in style_sheet[str(sigpac)] and sigpac == crop_type) :
+                    fn+=1 #* FALSE NEGATIVE
+                    # print("FN",fn)
+        hit_rate = tp/(tp+fn)
+        print(hit_rate)
+        sigpac_codes[str(crop_type)] = hit_rate
+
+    with open("file_prueba.json", 'w') as jfile:
+        json.dump(sigpac_codes, jfile)
+
+    print(sigpac_codes)
+
+    return json
+
+# crops_hit_rate(style_sheet, sigpac_band, classification_band)
 
 #*  TP  Banda numero 20(verde) coinciden SGP y SAT
 #*  TN  Banda numero 23(negro)  SAT cropland SGP no
 #*  FP  Banda numero 21(rojo)  No cropland n
 #*  FN  Banda numero 22(azul)  SGP cropland SAT ni en SAT ni SG
+
+
+def crop_metrics(sigpac_band, classification_band):
+
+    data_output = pd.DataFrame(columns=["Citricos Frutal","Citricos","Citricos-Frutal de cascara","Citricos-Viñedo", "Frutal de Cascara-Frutal",
+        "Frutal de Cascara-Olivar", "Frutal de Cascara", "Frutal de Cascara-Viñedo","Frutal", "Imvernadero y cultivos bajo plastico",
+        "Olivar-Citricos","Olivar-Frutal","Olivar","Tierra Arable","Huerta","Frutal-Viñedo","Viñedo","Olivar-Viñedo"],
+        index=["TP","FN", "Hit rate"])
+
+    print(data_output)
+
+    crop_codes = [3,4,5,6,9,10,12,13,14,16,17,18,19,23,24,25,26,27]
+    truep = []
+    falsen = []
+    hr = []
+    for crop_type in crop_codes:
+        print(crop_type)
+        # print(cont)
+        index_code_sigpac = np.where(sigpac_band == crop_type)
+        values_cl = classification_band[index_code_sigpac]
+        tp = len(np.where(values_cl == 6)[0])
+        truep.append(tp)
+        # data_output.loc['TP',cont] = tp
+
+        index_not_crop = np.where(classification_band != 6)
+        values_sg = sigpac_band[index_not_crop]
+        fn = len(np.where(values_sg == crop_type)[0])
+        falsen.append(fn)
+        # data_output.loc['FN',cont] = fn
+
+        hit_rate = tp/(tp+fn)
+        # data_output.loc['Hit rate',cont] = hit_rate
+        hr.append(hit_rate)
+
+    data_output.loc["TP"] = truep
+    data_output.loc["FN"] = falsen
+    data_output.loc["Hit rate"] = hr
+
+    print(data_output)
+    data_output.to_csv('csv/granada.csv') 
+
+crop_metrics(sigpac_band, classification_band)
+
 
 # "/home/jesus/Documents/satelite_images_sigpac/raster_comparison_malaga.tif"
 def validation(path: str) -> float:
@@ -579,16 +733,18 @@ def validation(path: str) -> float:
         print("Precision: ",precision)
         print("Recall: ",recall)
         print("F1-Score:",f1_score)
+        print("Sensitivity:", sensitivity)
         print("TruePositiveRate: ",tp_rate)
         print("FalsePositiveRate: ",fp_rate)
         print("-------------------------")
 
     return fp_rate, tp_rate
 
-x,y = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\malaga\\raster_comparison_malaga.tif")
-x2,y2 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_cordoba2.tif")
-x3,y3 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_granada.tif")
-x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\\raster_comparison_sevilla.tif")
+# x,y = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\malaga\\raster_comparison_malaga.tif")
+# x2,y2 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_cordoba2.tif")
+# x3,y3 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_granada.tif")
+# x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\\raster_comparison_sevilla.tif")
+# x_oliv,y_oliv = validation("/home/jesus/Documents/satelite_images_sigpac/FPandFN_raster_comparison_olive_jaen.tif")
 
 # plt.plot(x,y,'o')
 # plt.plot(x2,y2,'o')
@@ -601,8 +757,8 @@ x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\
 # plt.show()
 
 #TODO SOLUCIONAR PATHS A DIRECTORIOS CON JSON/MINIO
-#TODO TERMINAR ANDALUCIA COMPLETA Y MÉTRICAS
-#TODO MIRAR SI ES VIABLE HACER UK
+#TODO TERMINAR ANDALUCIA COMPLETA Y MÉTRICAS (IN PROCESS)
+#TODO MIRAR SI ES VIABLE HACER UK (IN PROCESS)
 
 # ypoints = np.array([0, y, y2, y3])
 # plt.plot(ypoints, linestyle = 'dotted')
@@ -651,7 +807,6 @@ x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\
 
 def prueba_de_uk():
 
-
     with fiona.open("C:\TFG_resources\RPA_CropMapOfEngland2020CAM_SHP_Full\data\Crop_Map_of_England_2020_Cambridgeshire.shp", "r") as json_cambridge:
         print(json_cambridge)
         # shapes = [feature["geometry"] for feature in json_cambridge]
@@ -661,14 +816,12 @@ def prueba_de_uk():
             # print(feature["geometry"])
         # print(shapes)
 
-
-
 # prueba_de_uk()
 
 
 def prueba_corine_tiff():
-
-  with rasterio.open("C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
+# "C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
+  with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/UK_CORINE/W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
     band = src.read()
     print(band)
     rows = band.shape[0] #* 16555
