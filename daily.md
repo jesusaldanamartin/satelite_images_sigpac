@@ -268,7 +268,7 @@ FN SI
 
 TN 
 
-### 24/11/2022
+## 24/11/2022
 
 Notas papel AM:
 
@@ -283,3 +283,11 @@ Métrica posible -> TP/(TP + FN) = % de olivs bien clasificados
 ¿reino unido CROVE comparar con corine?, ¿viable?
 
 Función terminadad para obtener el porcentaje de acierto de cada clase de cultivo. Guardando cada una por separado en formato csv par luego combinarlas y sacar medias o lo que sea (estudio por clases de cultivo), dejando puesto huelva en segundo plano antes de irme. Una vez terminado toda andalucia en sigpac raster y en métricas. Probar con Reino Unido aplicando mis mismas funciones.
+
+## 25/11/2022 
+
+Problemas a la hora de fusionar los archivos spain30S y spain29S. También para crear los masked_shp de Huelva (descargar de nuevo los datos). Voy a dejar ejecutando los datos de Cadiz para que solo falte Huelva de andalucía y luego ya comenzare con el resto de España. 
+
+De los data frame (.csv) que obtengo con el porcentaje de acierto de cada clase de crop. Estaría bien crear alguna que otra gráfica sobre los datos obtenidos y comentarlos por encima con AM.
+
+Por último lo del CROME y UK queda descartado porque está clasificado con RandomForest por lo que no voy a obtener ningún dato bueno comparandolo con el Corine. Habría que encontrar de algun país algo similar al SIGPAC para tener otro caso de uso más. Y quizás aplicar alguna tecnología.
