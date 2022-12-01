@@ -31,6 +31,9 @@ mask of classification_suf, nested loop for each band != 0 its dataset.transform
 Get all i,j positions that has no zero value, and save that i,j values, then get coordinates for those i,j by dataset.transform * (i,j).
 After that you got all important coordinates, now look for every coord in which polygon_geometry is contained so you can get the cod_uso of that geometry. Eventually you will need to replace in those i,j positions its cod_uso.
 
+# Octubre
+----------
+
 ## 03/10/2022
 
 Iterate trough the shapefile (find in which format are the cordinates and find if point are contained in them) if true just swap it in the correspondant arr.
@@ -135,6 +138,9 @@ Jaen
 Cadiz son 45 municipios diferentes. Algunos municipos no hacen overlap con sus classification_29*** por lo que cadiz saldrá sin todas las parcelas(concretamente el sigpac SP20_REC_11016)
 
 nohup command >/dev/null 2>&1
+
+# Noviembre
+-----------
 
 ## 03/11/2022
 
@@ -291,3 +297,8 @@ Problemas a la hora de fusionar los archivos spain30S y spain29S. También para 
 De los data frame (.csv) que obtengo con el porcentaje de acierto de cada clase de crop. Estaría bien crear alguna que otra gráfica sobre los datos obtenidos y comentarlos por encima con AM.
 
 Por último lo del CROME y UK queda descartado porque está clasificado con RandomForest por lo que no voy a obtener ningún dato bueno comparandolo con el Corine. Habría que encontrar de algun país algo similar al SIGPAC para tener otro caso de uso más. Y quizás aplicar alguna tecnología.
+
+# Diciembre
+-----------
+
+## 01/12/2022
