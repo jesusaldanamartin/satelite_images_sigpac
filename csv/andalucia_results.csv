@@ -1,0 +1,19 @@
+Clase                                ,Aciertos  ,Fallos   ,Porcentaje de Acierto ,Num Pixeles
+Citricos Frutal                      ,    89403 ,  979897 ,                 8.36 ,    1069300
+Citricos                             ,  5856071 , 2185685 ,                72.82 ,    8041756
+Citricos-Frutal de cascara           ,     1545 ,    7154 ,                17.76 ,       8699
+Citricos-Viñedo                      ,  2950975 ,    1059 ,                99.96 ,    2952034
+Frutal de Cascara-Frutal             ,     7312 ,  831503 ,                 0.87 ,     838815
+Frutal de Cascara-Olivar             ,    82857 ,  196400 ,                29.67 ,     279257
+Frutal de Cascara                    ,  9080721 ,11096748 ,                45.0  ,   20177469
+Frutal de Cascara-Viñedo             ,     3806 ,    8630 ,                30.6  ,      12436
+Frutal                               ,  4774161 , 9937804 ,                32.45 ,   14711965
+Imvernadero y cultivos bajo plastico ,   771053 , 4243997 ,                15.37 ,    5015050
+Olivar-Citricos                      ,    36820 ,   73883 ,                33.26 ,     110703
+Olivar-Frutal                        ,    30066 ,   63609 ,                32.1  ,      93675
+Olivar                               , 72449454 ,90171231 ,                44.55 ,  162620685
+Tierra Arable                        ,105376719 ,55991331 ,                65.3  ,  161368050
+Huerta                               ,   570850 ,  667416 ,                46.1  ,    1238266
+Frutal-Viñedo                        ,    35013 ,   63879 ,                35.41 ,      98892
+Viñedo                               ,  1122568 , 1251335 ,                47.29 ,    2373903
+Olivar-Viñedo                        ,    55533 ,   92121 ,                37.61 ,     147654

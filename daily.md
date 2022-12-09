@@ -302,3 +302,12 @@ Por último lo del CROME y UK queda descartado porque está clasificado con Rand
 -----------
 
 ## 01/12/2022
+
+Se ha quedado huelva haciendo. Andalucia entera terminada con sus metricas y algunos rasters de comparacion. Preguntar como seguir avanzando. O bien seguir buscando mas casos de uso fuera de España que no sean sigpac o bien intentar validar sus resultados u otros.
+
+## 05/12/2022
+
+He dejado Ávila al completo procesando.
+
+## 09/12/2022
+

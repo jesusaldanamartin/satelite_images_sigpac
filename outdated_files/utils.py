@@ -725,3 +725,63 @@ with rasterio.open("resultado7_210922.tif", "w",
                 dtype=dtype,
                 transform=transforma) as dst:
     dst.write(my_array[:,2],1)  
+
+
+
+def crops_hit_rate_to_json(style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray, output_path) -> np.ndarray:
+    ''''''
+
+    flat_sigpac_band = sigpac_band.ravel()
+    flat_classification_band = classification_band.ravel()
+
+    sigpac_codes = {
+            "3": "" ,
+            "4": "",
+            "5": "",
+            "6": "",
+            "9": "",
+            "10":"",
+            "12":"",
+            "13":"",
+            "14":"",
+            "16":"",
+            "17":"",
+            "18":"",
+            "19":"",
+            "23":"",
+            "24":"",
+            "25":"",
+            "26":"",
+            "27":""
+    }
+
+    crop_codes = [3,4,5,6,9,10,12,13,14,16,17,18,19,23,24,25,26,27]
+    for crop_type in crop_codes:
+        tp = 0
+        fn = 0
+        print("Tipo crop", crop_type)
+        for index, (sigpac, classification) in tqdm(enumerate(zip_longest(flat_sigpac_band, flat_classification_band))):
+            # print(index)
+            # print(flat_sigpac_band[index])
+            # print(flat_classification_band[index])
+            if sigpac != 0 and classification !=0:
+                # print("SI")
+                # print(crop_type)
+                if sigpac == crop_type and classification == 6:
+                    tp+=1 #* TRUE POSITIVE
+                    # print("TP",tp)
+                elif classification != 6 and (6 in style_sheet[str(sigpac)] and sigpac == crop_type) :
+                    fn+=1 #* FALSE NEGATIVE
+                    # print("FN",fn)
+        hit_rate = tp/(tp+fn)
+        print(hit_rate)
+        sigpac_codes[str(crop_type)] = hit_rate
+
+    with open(output_path, 'w') as jfile:
+        json.dump(sigpac_codes, jfile)
+
+    print(sigpac_codes)
+
+    return json
+
+# crops_hit_rate_to_json(style_sheet, sigpac_band, classification_band, output_path)

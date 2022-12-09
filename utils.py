@@ -101,9 +101,17 @@ def get_id_codigo_uso(key: str) -> None:
 
 def reproject_raster(in_path, out_path):
     #TODO finish docstring
-    '''AM function'''
+    '''Given an in and out path this function reproject a raster into any coordinate reference system set
 
-    crs = "epsg:4326"
+    Args:
+        in_path (str): Path to the raster we want to reproject.
+        out_path (str):  Output path where the raster will be saved.
+
+    Return:
+        None
+    '''
+    #  - ETRS89 / UTM zone 30N
+    crs = "EPSG:4258"
     # reproject raster to project crs
     with rasterio.open(in_path) as src:
         src_crs = src.crs
@@ -147,13 +155,16 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
     with rasterio.open(tif_path, "r") as src:
         out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
         out_meta = src.meta
+        src_crs = src.crs
 
-    out_meta.update({"driver": "GTiff",
+    out_meta.update({
+                 "driver": "GTiff",
                  "height": out_image.shape[1],
                  "width": out_image.shape[2],
                  "transform": out_transform,
-                 "crs": "+proj=utm +zone=29 +ellps=WGS84 +units=m +no_defs "})
-
+                 "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs"
+                
+            })
     with rasterio.open(output_name, "w", **out_meta) as dest:
         dest.write(out_image)
 
@@ -200,6 +211,7 @@ def merge_tiff_images_in_directory(folder_path: str, output_path: str):
     for file in folder_files:
         src = rasterio.open(folder_path+f"/{file}")
         src_files_to_mosaic.append(src)
+        src_crs = src.crs
 
     mosaic, out_trans = merge.merge(src_files_to_mosaic)
 
@@ -209,7 +221,7 @@ def merge_tiff_images_in_directory(folder_path: str, output_path: str):
         "height": mosaic.shape[1],
         "width": mosaic.shape[2],
         "transform": out_trans,
-        "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs "
+        "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs"
         }
         )
     try:
@@ -359,6 +371,10 @@ def save_output_file(tif_path: str, shp_path: str,output_path: str):
         with rasterio.open(output_path, 'w', **profile) as dst:
             dst.write(arr, 1)
 
+save_output_file("./masked_shp/AVILA/avilaMasked.tif",
+                "./Shapefile_Data/AVILA/05_RECFE.shp",
+                "resul_avila.tif")
+
 def read_masked_files(folder_path, shp_data_folder, sigpac_data_folder):
     '''For every masked file in folder save_output_file() function is called 
     to convert input masked files into masked sigpac tif.
@@ -378,8 +394,8 @@ def read_masked_files(folder_path, shp_data_folder, sigpac_data_folder):
         if file_number[0:5]+f"_sigpac.tif" not in os.listdir(sigpac_data_folder):
             print(file)
             save_output_file(folder_path+f"/{file}",
-                            shp_data_folder+f"/sp22_REC_11{file_number[2:5]}.shp",
-                            sigpac_data_folder+f"11{file_number[2:5]}_sigpac.tif")
+                            shp_data_folder+f"/sp22_REC_21{file_number[2:5]}.shp",
+                            sigpac_data_folder+f"21{file_number[2:5]}_sigpac.tif")
             print("")
             print(file+" finished")
 
@@ -565,70 +581,13 @@ def apply_style_sheet_to_raster(json_path: str, sigpac_path: str, masked_path: s
 #     "./results/cadiz/cadizMask_sigpac.tif",
 #     "./results/cadiz/cadizMask.tif")
 
-def crops_hit_rate_to_json(style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray, output_path) -> np.ndarray:
-
-    flat_sigpac_band = sigpac_band.ravel()
-    flat_classification_band = classification_band.ravel()
-
-    sigpac_codes = {
-            "3": "" ,
-            "4": "",
-            "5": "",
-            "6": "",
-            "9": "",
-            "10":"",
-            "12":"",
-            "13":"",
-            "14":"",
-            "16":"",
-            "17":"",
-            "18":"",
-            "19":"",
-            "23":"",
-            "24":"",
-            "25":"",
-            "26":"",
-            "27":""
-    }
-
-    crop_codes = [3,4,5,6,9,10,12,13,14,16,17,18,19,23,24,25,26,27]
-    for crop_type in crop_codes:
-        tp = 0
-        fn = 0
-        print("Tipo crop", crop_type)
-        for index, (sigpac, classification) in tqdm(enumerate(zip_longest(flat_sigpac_band, flat_classification_band))):
-            # print(index)
-            # print(flat_sigpac_band[index])
-            # print(flat_classification_band[index])
-            if sigpac != 0 and classification !=0:
-                # print("SI")
-                # print(crop_type)
-                if sigpac == crop_type and classification == 6:
-                    tp+=1 #* TRUE POSITIVE
-                    # print("TP",tp)
-                elif classification != 6 and (6 in style_sheet[str(sigpac)] and sigpac == crop_type) :
-                    fn+=1 #* FALSE NEGATIVE
-                    # print("FN",fn)
-        hit_rate = tp/(tp+fn)
-        print(hit_rate)
-        sigpac_codes[str(crop_type)] = hit_rate
-
-    with open(output_path, 'w') as jfile:
-        json.dump(sigpac_codes, jfile)
-
-    print(sigpac_codes)
-
-    return json
-
-# crops_hit_rate_to_json(style_sheet, sigpac_band, classification_band, output_path)
-
 #*  TP  Banda numero 20(verde) coinciden SGP y SAT
 #*  TN  Banda numero 23(negro)  SAT cropland SGP no
 #*  FP  Banda numero 21(rojo)  No cropland n
 #*  FN  Banda numero 22(azul)  SGP cropland SAT ni en SAT ni SG
 
-def crop_metrics(sigpac_band, classification_band):
-    '''Create a pre-known Data Frame with all the metrics information obtained.
+def crop_metrics(sigpac_band, classification_band, output_path):
+    '''Create a Data Frame with all the metrics information obtained.
 
     Args:
         sigpac_band (np.ndarray): Raster information from sigpac data.
@@ -665,8 +624,10 @@ def crop_metrics(sigpac_band, classification_band):
         fn = len(np.where(values_sg == crop_type)[0])
         falsen.append(fn)
         # data_output.loc['FN',cont] = fn
-
-        hit_rate = tp/(tp+fn)
+        try:
+            hit_rate = tp/(tp+fn)
+        except ZeroDivisionError:
+            pass
         # data_output.loc['Hit rate',cont] = hit_rate
         hr.append(hit_rate)
 
@@ -675,10 +636,42 @@ def crop_metrics(sigpac_band, classification_band):
     data_output.loc["Hit rate"] = hr
 
     print(data_output)
-    data_output.to_csv('csv/cadiz.csv') 
+    data_output.to_csv(output_path) 
 
 # crop_metrics(sigpac_band, classification_band)
 
+def process_dataframe(data_path):
+    '''Given the dataframe created in crop_metrics() function the df is processed. 
+    It now stores the hit percentage and number of pixels
+
+    Args:
+        data_path (str): Path to the dataframe.
+
+    Return:
+        The new data will be printed in terminal.
+    '''
+    dataframe = pd.read_csv(data_path)
+
+    tp = (0,3,6,9,12,15,18,21)
+    tn = (1,4,7,10,13,16,19,22)
+    aciertos=0
+    fallos=0
+    row = 1
+    for i in range(18):
+        aciertos = 0
+        fallos = 0
+        porcentaje = 0
+        num_pixeles = 0
+        for num in tp: 
+            aciertos += dataframe[dataframe.columns[row]][num]
+        for num in tn: 
+            fallos += dataframe[dataframe.columns[row]][num]
+        porcentaje = ((aciertos)/(aciertos+fallos))*100
+        num_pixeles = aciertos+fallos
+        print(dataframe.columns[row],",",int(aciertos),",",int(fallos),",",round(porcentaje,2),",",int(num_pixeles))
+        row+=1
+
+# process_dataframe("./csv/andalucia_tp_tn.csv")
 
 # "./raster_comparison_malaga.tif"
 def validation(path: str) -> float:
@@ -743,6 +736,8 @@ def validation(path: str) -> float:
 # x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\\raster_comparison_sevilla.tif")
 # x_oliv,y_oliv = validation("/home/jesus/Documents/satelite_images_sigpac/FPandFN_raster_comparison_olive_jaen.tif")
 
+#!---------------------------------------------------------------------------------------------------------------------------------------
+
 def graphs():
     # with open("/home/jesus/Documents/satelite_images_sigpac/csv/andalucia.csv", mode='r') as file:
     #     df = pd.read_csv(file)
@@ -762,10 +757,8 @@ def graphs():
 # plt.ylabel('True Positive Rate')
 # plt.show()
 
-#TODO SOLUCIONAR PATHS A DIRECTORIOS CON JSON/MINIO
-#TODO TERMINAR ANDALUCIA COMPLETA Y MÉTRICAS (IN PROCESS)
-#TODO MIRAR SI ES VIABLE HACER UK (IN PROCESS)
-#TODO HUELVA
+#TODO SOLUCIONAR PATHS A DIRECTORIOS CON JSON/MINIO (¿necesario?)
+#TODO MIRAR SI ES VIABLE HACER UK (IN PROCESS)->(PARECE QUE NO)
 
 # ypoints = np.array([0, y, y2, y3])
 # plt.plot(ypoints, linestyle = 'dotted')
