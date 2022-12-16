@@ -1,43 +1,26 @@
 from rasterio import (
     rasterio,
-    features,
-    warp,
-    merge,
-    plot,
-    mask,
-    windows,
-    transform,
-    crs
+    merge
 )
 
 from rasterio.warp import Resampling, reproject, calculate_default_transform
 
 import rasterio._err
 import pandas as pd
-from shapely.geometry import Polygon, MultiPolygon, MultiLineString, MultiPoint, Point
 
 from tqdm import tqdm
 from numba import jit
 from numba.core.errors import NumbaDeprecationWarning, NumbaPendingDeprecationWarning
 import fiona
 import numpy as np
-from multiprocessing import Process, Manager
 import threading
-from itertools import zip_longest
-import seaborn as sns
 
 from typing import Any, List, Tuple, BinaryIO
-from pathlib import Path
 import os
 import json
 from os import listdir
 from os.path import isfile, join
 import warnings
-from matplotlib import pyplot as plt
-
-# from osgeo import gdal
-# from osgeo import ogr
-# from osgeo import gdalconst
 
 warnings.simplefilter('ignore', category=NumbaDeprecationWarning)
 warnings.simplefilter('ignore', category=NumbaPendingDeprecationWarning)
@@ -100,7 +83,6 @@ def get_id_codigo_uso(key: str) -> None:
 
 
 def reproject_raster(in_path, out_path):
-    #TODO finish docstring
     '''Given an in and out path this function reproject a raster into any coordinate reference system set
 
     Args:
@@ -144,7 +126,7 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
         shp_path (str): Path to the shapefile file.
         tif_path (str): Path to the tif image.
         output_name (str): File name to be saved.
-    
+
     Returns:
         Save in working directory the image croppped.
     '''
@@ -177,9 +159,11 @@ def masked_all_shapefiles_in_directory(folder_path: str, output_path: str, mask:
 
     Args:
         folder_path (str): Path to the directory where all shapefiles are stored.
+        output_path (str): Path to the output directory.
+        mask (str) : Path to the .tif image that is going to be used to mask the shapefiles.
     
     Return:
-        A file is created for each shp in folder.
+        A file is created for each shapefile in folder.
     '''
 
     folder_files = os.listdir(folder_path)
@@ -316,7 +300,6 @@ def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transform
                         arr[ind_arr[0],ind_arr[1]] = cd_uso #* replace the new use code from SIGPAC in the old band value.
     # return arr
 
-
 def multithreading(points_list: list, shp_path: str, arr: np.ndarray, transformer: rasterio.Affine) -> None:
     '''Execute the process with multiple threads improving performance.
 
@@ -371,16 +354,18 @@ def save_output_file(tif_path: str, shp_path: str,output_path: str):
         with rasterio.open(output_path, 'w', **profile) as dst:
             dst.write(arr, 1)
 
-save_output_file("./masked_shp/AVILA/avilaMasked.tif",
-                "./Shapefile_Data/AVILA/05_RECFE.shp",
-                "resul_avila.tif")
+# save_output_file("./masked_shp/AVILA/avilaMasked.tif",
+#                 "./Shapefile_Data/AVILA/05_RECFE.shp",
+#                 "resul_avila.tif")
 
-def read_masked_files(folder_path, shp_data_folder, sigpac_data_folder):
+def read_masked_files(folder_path: str, shp_data_folder: str, sigpac_data_folder: str):
     '''For every masked file in folder save_output_file() function is called 
     to convert input masked files into masked sigpac tif.
 
     Args:
         folder_path (str): Path to the folder with all masked files.
+        shp_data_folder (str): Path to the directory where all shapefiles are stored.
+        sigpac_data_folder (str): Path to the sigpac tif file.
 
     Returns:
         One file for each shapefile.
@@ -415,7 +400,6 @@ def raster_comparison(rows: int,cols: int, new_raster_output: np.ndarray,
         style_sheet (dict): Path to the json file.
         sigpac_band (ndarray): Sigpac raster band read with rasterio.
         classification_band (ndarray): Lab raster band read with rasterio.
-
 
     Returns:
         This function returns a ndarray where band values have been replaced with 
@@ -462,7 +446,6 @@ def raster_comparison_cropland(rows: int,cols: int, new_raster_output: np.ndarra
         style_sheet (dict): Path to the json file.
         sigpac_band (ndarray): Sigpac raster band read with rasterio.
         classification_band (ndarray): Lab raster band read with rasterio.
-
 
     Returns:
         This function returns a ndarray matrix where band values have been replaced with 
@@ -552,6 +535,9 @@ def apply_style_sheet_to_raster(json_path: str, sigpac_path: str, masked_path: s
         masked_path (str): Path to the classification raster (LAB).
 
     Returns:
+        style_sheet (dict): Data obtained from json_path. 
+        sigpac_band (np.ndarray): Raster data read with rasterio.
+        classification_band (np.ndarray): Raster data read with rasterio.
 
     '''
     with open(json_path) as jfile:
@@ -592,6 +578,7 @@ def crop_metrics(sigpac_band, classification_band, output_path):
     Args:
         sigpac_band (np.ndarray): Raster information from sigpac data.
         classification_band (np.ndarray): Raster information Random forest classification from sentinel-2
+        output_path (str): Path to the directory where csv will be stored.
 
     Return:
         None
@@ -602,14 +589,12 @@ def crop_metrics(sigpac_band, classification_band, output_path):
         "Olivar-Citricos","Olivar-Frutal","Olivar","Tierra Arable","Huerta","Frutal-Viñedo","Viñedo","Olivar-Viñedo"],
         index=["TP","FN", "Hit rate"])
 
-    print(data_output)
-
     crop_codes = [3,4,5,6,9,10,12,13,14,16,17,18,19,23,24,25,26,27]
     truep = []
     falsen = []
     hr = []
     for crop_type in crop_codes:
-        print(crop_type)
+#        print(crop_type)
         # print(cont)
         index_code_sigpac = np.where(sigpac_band == crop_type)
         values_cl = classification_band[index_code_sigpac]
@@ -683,7 +668,6 @@ def validation(path: str) -> float:
 
     Returns:
         This function writes in the terminal the metrics.
-        #TODO:
     '''
 
     with rasterio.open(path) as src:
@@ -731,103 +715,3 @@ def validation(path: str) -> float:
     return fp_rate, tp_rate
 
 # x,y = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\malaga\\raster_comparison_malaga.tif")
-# x2,y2 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_cordoba2.tif")
-# x3,y3 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_granada.tif")
-# x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\\raster_comparison_sevilla.tif")
-# x_oliv,y_oliv = validation("/home/jesus/Documents/satelite_images_sigpac/FPandFN_raster_comparison_olive_jaen.tif")
-
-#!---------------------------------------------------------------------------------------------------------------------------------------
-
-def graphs():
-    # with open("/home/jesus/Documents/satelite_images_sigpac/csv/andalucia.csv", mode='r') as file:
-    #     df = pd.read_csv(file)
-    #     print(df.iloc[[1]])
-    #     plt.bar(df.iloc[[3]],df.iloc[[0]],'o')
-    #     plt.show()
-    return
-
-# graphs()
-
-# plt.plot(x2,y2,'o')
-# plt.plot(x3,y3,'o')
-# plt.plot(x4,y4,'o')
-# plt.xlim((0,1))
-# plt.ylim((0,1))
-# plt.xlabel('False Positive Rate')
-# plt.ylabel('True Positive Rate')
-# plt.show()
-
-#TODO SOLUCIONAR PATHS A DIRECTORIOS CON JSON/MINIO (¿necesario?)
-#TODO MIRAR SI ES VIABLE HACER UK (IN PROCESS)->(PARECE QUE NO)
-
-# ypoints = np.array([0, y, y2, y3])
-# plt.plot(ypoints, linestyle = 'dotted')
-
-#!---------------------------------------------------------------------------------------------------------------------------------------
-
-# ecw_file = gdal.Info("C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw")
-# tranls = gdal.Translate(ecw_file)
-# print(tranls)
-# print(ecw_file)
-
-# data = gdal.Open()
-# geo_transform = data.GetGeoTransform()
-# source_layer = data.GetLayer()
-# print(geo_transform)
-# print(source_layer)
-# print(data)
-
-# ndsm = 'C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw'
-# shp = 'C:\TFG_resources\shape_files\Malaga_Municipios_Separados\SP20_REC_29012.shp'
-# data = gdal.Open(ndsm, gdalconst.GA_ReadOnly)
-# geo_transform = data.GetGeoTransform()
-# source_layer = data.GetLayer()
-# x_min = geo_transform[0]
-# y_max = geo_transform[3]
-# x_max = x_min + geo_transform[1] * data.RasterXSize
-# y_min = y_max + geo_transform[5] * data.RasterYSize
-# x_res = data.RasterXSize
-# y_res = data.RasterYSize
-# mb_v = ogr.Open(shp)
-# mb_l = mb_v.GetLayer()
-# pixel_width = geo_transform[1]
-# output = 'C:\TFG_resources\satelite_images_sigpac\output'
-# target_ds = gdal.GetDriverByName('GTiff').Create(output, x_res, y_res, 1, gdal.GDT_Byte)
-# target_ds.SetGeoTransform((x_min, pixel_width, 0, y_min, 0, pixel_width))
-# band = target_ds.GetRasterBand(1)
-# NoData_value = -999999
-# band.SetNoDataValue(NoData_value)
-# band.FlushCache()
-# gdal.RasterizeLayer(target_ds, [1], mb_l, options=["ATTRIBUTE=hedgerow"])
-
-# target_ds = None
-
-def prueba_de_uk():
-
-    with fiona.open("C:\TFG_resources\RPA_CropMapOfEngland2020CAM_SHP_Full\data\Crop_Map_of_England_2020_Cambridgeshire.shp", "r") as json_cambridge:
-        print(json_cambridge)
-        # shapes = [feature["geometry"] for feature in json_cambridge]
-        for feature in json_cambridge:
-            print(feature['properties'])
-
-            # print(feature["geometry"])
-        # print(shapes)
-
-# prueba_de_uk()
-
-def prueba_corine_tiff():
-# "C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
-  with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/UK_CORINE/W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
-    band = src.read()
-    print(band)
-    rows = band.shape[0] #* 16555
-    cols = band.shape[1] #* 16555
-    print(rows)
-    print(cols)
-    print(len(band[0][900]))
-    pink = np.where(band==40)
-    print(pink)
-    crop = len(pink[0]) + len(pink[1]) + len(pink[2])
-    print(crop)
-
-# prueba_corine_tiff()
