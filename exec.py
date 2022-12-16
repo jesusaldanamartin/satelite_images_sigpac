@@ -1,15 +1,17 @@
 from utils import *
 
-# reproject_raster("./results/spain30T.tif", "./results/spain30T_4258.tif")
+
+# reproject_raster("./results/spain30T.tif", "./results/spain30T_4258.tif") #* Reproject raster into new crs
 
 #* MASK SINGLE FILE
 # mask_shp("./Shapefile_Data/AVILA/05_RECFE.shp",
 #          "./results/spain30T_4258.tif", 
 #         "avilaMasked.tif")
 
-#* FOLDER
+#* MASK FOLDER OF SHP
 # masked_all_shapefiles_in_directory("./Shapefile_Data/HUELVA", "./masked_shp/HUELVA/","./results/spain29S_latlon.tif")
 
+#* MERFE ALL TIFFS FROM FOLDER
 # merge_tiff_images_in_directory("./masked_shp/HUELVA/","./results/huelva/huelvaMasked.tif")
 
 #* SINGLE RASTER OUTPUT
@@ -17,23 +19,21 @@ from utils import *
 #                 "./Shapefile_Data/AVILA/05_RECFE.shp",
 #                 "resul_avila.tif")
 
-#* FINAL RASTER OUTPUT FROM FOLDER
+#* FOLDER RASTER OUTPUT
 # read_masked_files("./masked_shp/HUELVA/", "./Shapefile_Data/HUELVA","./masked_sigpac/HUELVA/")
 
 #* FUNCTIONS USED TO VALIDATE THE RASTER
 def results_validation():
 
-
-
-    style_sheet, sigpac_band, classification_band = apply_style_sheet_to_raster("./json/olive_style_sheet.json",
-        "./results/huelva/huelvaMask_sigpac.tif",
-        "./results/huelva/huelvaMasked.tif")
+    # style_sheet, sigpac_band, classification_band = apply_style_sheet_to_raster("./json/olive_style_sheet.json",
+    #     "./results/huelva/huelvaMask_sigpac.tif",
+    #     "./results/huelva/huelvaMasked.tif")
 
     # crops_hit_rate_to_json(style_sheet, sigpac_band, classification_band, "hit_rate.json")
     # x,y = validation("./results/malaga/raster_comparison_malaga.tif")
-    crop_metrics(sigpac_band, classification_band, 'csv/huelva.csv')
+    # crop_metrics(sigpac_band, classification_band, 'csv/huelva.csv')
 
-# results_validation()
+    results_validation()
 
-#* Get final csv
+#* ANDALUCIA CSV
 # process_dataframe("./csv/andalucia_tp_tn.csv")
