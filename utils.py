@@ -100,7 +100,6 @@ def get_id_codigo_uso(key: str) -> None:
 
 
 def reproject_raster(in_path, out_path):
-    #TODO finish docstring
     '''Given an in and out path this function reproject a raster into any coordinate reference system set
 
     Args:
@@ -111,7 +110,7 @@ def reproject_raster(in_path, out_path):
         None
     '''
     #  - ETRS89 / UTM zone 30N
-    crs = "EPSG:4258"
+    crs = "EPSG:EPSG:27700"
     # reproject raster to project crs
     with rasterio.open(in_path) as src:
         src_crs = src.crs
@@ -134,8 +133,8 @@ def reproject_raster(in_path, out_path):
                     dst_crs=crs,
                     resampling=Resampling.nearest)
 
-# reproject_raster("/home/jesus/Documents/satelite_images_sigpac/results/spain30S.tif", 
-#     "/home/jesus/Documents/satelite_images_sigpac/results/spain30S_latlon.tif")
+# reproject_raster("C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", 
+#     "/home/jesus/Documents/satelite_images_sigpac/results/UK_CORINE/british_grid.tif")
 
 def mask_shp(shp_path: str, tif_path: str, output_name: str):
     '''Crop a tif image with the shapefile geoemetries.
@@ -371,9 +370,9 @@ def save_output_file(tif_path: str, shp_path: str,output_path: str):
         with rasterio.open(output_path, 'w', **profile) as dst:
             dst.write(arr, 1)
 
-save_output_file("./masked_shp/AVILA/avilaMasked.tif",
-                "./Shapefile_Data/AVILA/05_RECFE.shp",
-                "resul_avila.tif")
+# save_output_file("./masked_shp/AVILA/avilaMasked.tif",
+#                 "./Shapefile_Data/AVILA/05_RECFE.shp",
+#                 "resul_avila.tif")
 
 def read_masked_files(folder_path, shp_data_folder, sigpac_data_folder):
     '''For every masked file in folder save_output_file() function is called 
@@ -816,8 +815,7 @@ def prueba_de_uk():
 # prueba_de_uk()
 
 def prueba_corine_tiff():
-# "C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif"
-  with rasterio.open("/home/jesus/Documents/satelite_images_sigpac/UK_CORINE/W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
+  with rasterio.open("C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
     band = src.read()
     print(band)
     rows = band.shape[0] #* 16555
