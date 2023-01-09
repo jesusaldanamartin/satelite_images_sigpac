@@ -9,3 +9,4 @@ __pycache__
 UK_CORINE
 updated_classification
 *.tif
+dataset_postprocessed.csv

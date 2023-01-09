@@ -311,3 +311,17 @@ He dejado Ávila al completo procesando.
 
 ## 09/12/2022
 
+^^^Pensamientos^^^
+Para ampliar contenidos vamos a aplicar machine learning. Con los datos post-procesados y el código que me ha dado AM. 
+El objetivo es encontrar aplicar una especie de cross-validation donde vamos a ir cambiadno los parametros de training tras cada iteracion para luego validarlos finalmente con mis datos finales. Con el objetivo de ver si utilizando mis datos como guía podemos obtener mejores resultados.
+
+¿Que esperan?
+
+Que sustituya los valores de su X_test (aquellos pixeles que tengo yo) por los mios y validar respecto a mi informacion además de intentar mejorar resultados cambiando parametros o modelos de ML.
+O bien quieren que sustituya mis valores de raster en los suyos y hacer el modelo entero.
+
+
+Yo saco hit_rate que es -> hit_rate = tp/(tp+fn)
+
+----
+Para el próximo día comenzar a programar un 5x2 o 10x2 cross-validation utilizando diferentes modelos no solo random forest y variando los parmetros de los modelos con el objetivo de mejorar resultados. Finalmente comparar datos con los mios.
