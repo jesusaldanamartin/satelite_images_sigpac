@@ -1,0 +1,1 @@
+{"model": "<class 'sklearn.ensemble._forest.RandomForestClassifier'>", "n_jobs": 2, "used_columns": "list(used_columns)", "classes": ["builtUp", "herbaceousVegetation", "openForest", "cropland", "shrubland", "closedForest", "bareSoil", "wetland", "water"]}

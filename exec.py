@@ -1,7 +1,6 @@
 from utils import *
 
-
-# reproject_raster("./results/spain30T.tif", "./results/spain30T_4258.tif") #* Reproject raster into new crs
+reproject_raster("./results/spain30T.tif", "./results/spain30T_4258.tif")
 
 #* MASK SINGLE FILE
 # mask_shp("./Shapefile_Data/AVILA/05_RECFE.shp",

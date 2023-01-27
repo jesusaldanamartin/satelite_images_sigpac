@@ -1,0 +1,10 @@
+                     ,builtUp ,herbaceousVegetation ,openForest ,cropland ,shrubland ,closedForest ,bareSoil ,wetland ,water
+builtUp              ,   2843 ,                   6 ,        14 ,      16 ,       13 ,          12 ,      23 ,      2 ,    1
+herbaceousVegetation ,      4 ,                2580 ,        23 ,      14 ,        3 ,          26 ,      17 ,      3 ,    2
+openForest           ,      4 ,                   6 ,      2161 ,       1 ,       19 ,         171 ,       7 ,      0 ,    0
+cropland             ,     21 ,                  15 ,         5 ,    3117 ,        4 ,          37 ,       4 ,      2 ,    0
+shrubland            ,      4 ,                  12 ,        11 ,       4 ,     1764 ,          42 ,       5 ,      1 ,    0
+closedForest         ,      6 ,                  17 ,        74 ,      15 ,       30 ,        2743 ,       5 ,      0 ,    4
+bareSoil             ,     10 ,                  21 ,         1 ,       0 ,        3 ,          22 ,    2050 ,      0 ,    0
+wetland              ,      0 ,                   0 ,         0 ,       0 ,        0 ,           3 ,       0 ,    497 ,    0
+water                ,      0 ,                   0 ,         0 ,       0 ,        0 ,           3 ,       0 ,      2 ,  444

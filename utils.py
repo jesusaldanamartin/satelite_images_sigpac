@@ -93,7 +93,7 @@ def reproject_raster(in_path, out_path):
         None
     '''
     #  - ETRS89 / UTM zone 30N
-    crs = "EPSG:4258"
+    crs = "EPSG:EPSG:27700"
     # reproject raster to project crs
     with rasterio.open(in_path) as src:
         src_crs = src.crs
@@ -116,8 +116,8 @@ def reproject_raster(in_path, out_path):
                     dst_crs=crs,
                     resampling=Resampling.nearest)
 
-# reproject_raster("/home/jesus/Documents/satelite_images_sigpac/results/spain30S.tif", 
-#     "/home/jesus/Documents/satelite_images_sigpac/results/spain30S_latlon.tif")
+# reproject_raster("C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", 
+#     "/home/jesus/Documents/satelite_images_sigpac/results/UK_CORINE/british_grid.tif")
 
 def mask_shp(shp_path: str, tif_path: str, output_name: str):
     '''Crop a tif image with the shapefile geoemetries.
@@ -715,3 +715,102 @@ def validation(path: str) -> float:
     return fp_rate, tp_rate
 
 # x,y = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\malaga\\raster_comparison_malaga.tif")
+# x2,y2 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_cordoba2.tif")
+# x3,y3 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\raster_comparison_granada.tif")
+# x4,y4 = validation("C:\\TFG_resources\\satelite_images_sigpac\\results\\sevilla\\raster_comparison_sevilla.tif")
+# x_oliv,y_oliv = validation("/home/jesus/Documents/satelite_images_sigpac/FPandFN_raster_comparison_olive_jaen.tif")
+
+#!---------------------------------------------------------------------------------------------------------------------------------------
+
+def graphs():
+    # with open("/home/jesus/Documents/satelite_images_sigpac/csv/andalucia.csv", mode='r') as file:
+    #     df = pd.read_csv(file)
+    #     print(df.iloc[[1]])
+    #     plt.bar(df.iloc[[3]],df.iloc[[0]],'o')
+    #     plt.show()
+    return
+
+# graphs()
+
+# plt.plot(x2,y2,'o')
+# plt.plot(x3,y3,'o')
+# plt.plot(x4,y4,'o')
+# plt.xlim((0,1))
+# plt.ylim((0,1))
+# plt.xlabel('False Positive Rate')
+# plt.ylabel('True Positive Rate')
+# plt.show()
+
+#TODO SOLUCIONAR PATHS A DIRECTORIOS CON JSON/MINIO (¿necesario?)
+#TODO MIRAR SI ES VIABLE HACER UK (IN PROCESS)->(PARECE QUE NO)
+
+# ypoints = np.array([0, y, y2, y3])
+# plt.plot(ypoints, linestyle = 'dotted')
+
+#!---------------------------------------------------------------------------------------------------------------------------------------
+
+# ecw_file = gdal.Info("C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw")
+# tranls = gdal.Translate(ecw_file)
+# print(tranls)
+# print(ecw_file)
+
+# data = gdal.Open()
+# geo_transform = data.GetGeoTransform()
+# source_layer = data.GetLayer()
+# print(geo_transform)
+# print(source_layer)
+# print(data)
+
+# ndsm = 'C:\\Users\\Pepe Aldana\\Documents\\PNOA-H_SIGPAC_OF_ETRS89_HU30_h50_1065.ecw'
+# shp = 'C:\TFG_resources\shape_files\Malaga_Municipios_Separados\SP20_REC_29012.shp'
+# data = gdal.Open(ndsm, gdalconst.GA_ReadOnly)
+# geo_transform = data.GetGeoTransform()
+# source_layer = data.GetLayer()
+# x_min = geo_transform[0]
+# y_max = geo_transform[3]
+# x_max = x_min + geo_transform[1] * data.RasterXSize
+# y_min = y_max + geo_transform[5] * data.RasterYSize
+# x_res = data.RasterXSize
+# y_res = data.RasterYSize
+# mb_v = ogr.Open(shp)
+# mb_l = mb_v.GetLayer()
+# pixel_width = geo_transform[1]
+# output = 'C:\TFG_resources\satelite_images_sigpac\output'
+# target_ds = gdal.GetDriverByName('GTiff').Create(output, x_res, y_res, 1, gdal.GDT_Byte)
+# target_ds.SetGeoTransform((x_min, pixel_width, 0, y_min, 0, pixel_width))
+# band = target_ds.GetRasterBand(1)
+# NoData_value = -999999
+# band.SetNoDataValue(NoData_value)
+# band.FlushCache()
+# gdal.RasterizeLayer(target_ds, [1], mb_l, options=["ATTRIBUTE=hedgerow"])
+
+# target_ds = None
+
+def prueba_de_uk():
+
+    with fiona.open("C:\TFG_resources\RPA_CropMapOfEngland2020CAM_SHP_Full\data\Crop_Map_of_England_2020_Cambridgeshire.shp", "r") as json_cambridge:
+        print(json_cambridge)
+        # shapes = [feature["geometry"] for feature in json_cambridge]
+        for feature in json_cambridge:
+            print(feature['properties'])
+
+            # print(feature["geometry"])
+        # print(shapes)
+
+# prueba_de_uk()
+
+def prueba_corine_tiff():
+  with rasterio.open("C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
+    band = src.read()
+    print(band)
+    rows = band.shape[0] #* 16555
+    cols = band.shape[1] #* 16555
+    print(rows)
+    print(cols)
+    print(len(band[0][900]))
+    pink = np.where(band==40)
+    print(pink)
+    crop = len(pink[0]) + len(pink[1]) + len(pink[2])
+    print(crop)
+
+# prueba_corine_tiff()
