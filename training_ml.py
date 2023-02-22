@@ -22,7 +22,7 @@ from sklearn.svm import SVC
 #* COMIENZA EL SCRIPT
 
 def _feature_reduction(
-    df_x: pd.DataFrame, df_y: pd.DataFrame, percentage_columns: int = 100
+    df_x: pd.DataFrame, df_y: pd.Series, percentage_columns: int = 100
 ):
     """Feature reduction method. Receives the training dataset and returns a set of variables."""
 
@@ -117,14 +117,14 @@ def _write_cells(
 
     else:
         if per > 0:
-            txt = f"$\mathbf{{{cell_val}}}$\n{per:.2f}%"
+            txt = f"$/mathbf{{{cell_val}}}$\n{per:.2f}%"
         else:
             if show_null_values == 0:
                 txt = ""
             elif show_null_values == 1:
                 txt = "0"
             else:
-                txt = "$\mathbf{0}$\n0.0%"
+                txt = "$/mathbf{0}$\n0.0%"
         o_text.set_text(txt)
 
         # main diagonal

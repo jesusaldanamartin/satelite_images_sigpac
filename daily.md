@@ -325,3 +325,32 @@ Yo saco hit_rate que es -> hit_rate = tp/(tp+fn)
 
 ----
 Para el próximo día comenzar a programar un 5x2 o 10x2 cross-validation utilizando diferentes modelos no solo random forest y variando los parmetros de los modelos con el objetivo de mejorar resultados. Finalmente comparar datos con los mios.
+
+
+## 21/02/2023
+
+Tocando código para realizar un multiprocessing correctamente, el problema reside en conseguir trasladar la informacion de cada proceso
+
+## 22/02/2023
+
+Terminado el multiprocessing para obtener un mejor rendimiento, ahora tarda al menos un 75% menos. Para terminar de recuperar todo lo perdido me falta crear los style sheets de QGIS y comenzar a obtener algunos .tif.
+
+Quizás habría que automatizar el realizar la máscara y la validación.
+
+Script workflow:
+
+1- Check the coordinates units from the source tiff.
+2- Get the reference in .tif format. Make sure the reference overlaps the data you want to validate.
+3- mask the preovious reference into cities,towns... Smaller .tif for better performance.
+4- Start to validate the data pixel by pixel.
+5- Merge all the results into a single tiff.
+6- Export .tiff, csv and graphs of the above results.
+
+#TODO Finish script with the validation rasters, csv and graphs.
+#TODO Update script now check if arguments are file or folders. If folder call folder functions.
+#TODO Update launch.sh It must get arguments and options via terminal. With help, version, usage.
+#TODO Fix the way the files are obtained, better functions instead of split. ¿Contains?
+#TODO Add new machine learning feature and link it to the actual workflow.
+#TODO Refactor all the code and the github.
+#TODO Finish the ipynb and upload custom example.
+

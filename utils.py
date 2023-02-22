@@ -1,7 +1,12 @@
 from rasterio import (
     rasterio,
-    merge
+    merge,
+    mask
 )
+
+import multiprocessing
+from multiprocessing import Manager, Array, pool
+import ctypes as c
 
 from rasterio.warp import Resampling, reproject, calculate_default_transform
 
@@ -41,7 +46,7 @@ TILES = ['30SYG', '29TPG', '31SCC', '31TDE', '31SBD', '31SBC', '29SPC', '30STH',
     '30TWM', '29TNG', '29THN', '29TNJ', '29TPJ', '29TQJ', '30TPU', '30TVP', '30TWP',
     '30TVN', '30TWN', '30TXN', '30TYN', '31TCH' ]
 
-def get_id_codigo_uso(key: str) -> None:
+def get_id_codigo_uso(key: str):
     '''Raster bands cannot have string value so each cod_uso it is been replaced with an id.
 
     Args:
@@ -82,7 +87,7 @@ def get_id_codigo_uso(key: str) -> None:
     if key == 'ZV' : return 30      #* Zona Censurada
 
 
-def reproject_raster(in_path, out_path):
+def reproject_raster(in_path: str, out_path: str, file_name: str, new_crs):
     '''Given an in and out path this function reproject a raster into any coordinate reference system set
 
     Args:
@@ -92,8 +97,9 @@ def reproject_raster(in_path, out_path):
     Return:
         None
     '''
-    #  - ETRS89 / UTM zone 30N
-    crs = "EPSG:EPSG:27700"
+    #  - 
+    crs = "EPSG:4258 ETRS89"
+    crs = new_crs
     # reproject raster to project crs
     with rasterio.open(in_path) as src:
         src_crs = src.crs
@@ -106,7 +112,7 @@ def reproject_raster(in_path, out_path):
             'width': width,
             'height': height})
 
-        with rasterio.open(out_path, 'w', **kwargs) as dst:
+        with rasterio.open(out_path + file_name, 'w', **kwargs) as dst:
                 reproject(
                     source=rasterio.band(src, 1),
                     destination=rasterio.band(dst, 1),
@@ -144,9 +150,10 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
                  "height": out_image.shape[1],
                  "width": out_image.shape[2],
                  "transform": out_transform,
-                 "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs"
-                
+                 "crs": src_crs
+                 #"crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs"   
             })
+            
     with rasterio.open(output_name, "w", **out_meta) as dest:
         dest.write(out_image)
 
@@ -172,16 +179,18 @@ def masked_all_shapefiles_in_directory(folder_path: str, output_path: str, mask:
         file_number = file.split('.')[0]
         if extension == 'shp':
             try:
-                mask_shp(folder_path+f"/{file}", mask, output_path+f"21{file_number[-3:]}_masked.tif")
+                mask_shp(folder_path+f"/{file}", mask, output_path+f"{file_number[:5]}_masked.tif")
             except ValueError:
                 print(file+" does not overlap figure")
 
-def merge_tiff_images_in_directory(folder_path: str, output_path: str):
+
+def merge_tiff_images_in_directory(folder_path: str, output_path: str, file_name: str):
     '''Merge all tiff images stored in folder_path.
 
     All metadata is saved and stored so the output will be be only a merge of all images given as input.
 
     Args:
+
         output_name (str): Name as the output file will be stored.
         folder_path (str): Path to the folder where tiff images are.
 
@@ -191,15 +200,16 @@ def merge_tiff_images_in_directory(folder_path: str, output_path: str):
 
     src_files_to_mosaic = []
     folder_files = os.listdir(folder_path)
+    out_meta = {"null:null"}
 
     for file in folder_files:
         src = rasterio.open(folder_path+f"/{file}")
         src_files_to_mosaic.append(src)
-        src_crs = src.crs
+        src_crs = src.crs #* For a new custom crs output
+
+        out_meta = src.meta.copy()
 
     mosaic, out_trans = merge.merge(src_files_to_mosaic)
-
-    out_meta = src.meta.copy()
 
     out_meta.update({"driver": "GTiff",
         "height": mosaic.shape[1],
@@ -209,7 +219,7 @@ def merge_tiff_images_in_directory(folder_path: str, output_path: str):
         }
         )
     try:
-        with rasterio.open(output_path, "w", **out_meta) as dest:
+        with rasterio.open(output_path + file_name, "w", **out_meta) as dest:
             dest.write(mosaic)
     except rasterio._err.CPLE_BaseError:
         print("Merge file already exists")
@@ -268,7 +278,7 @@ def index_values(points_list: list, polygon: list) -> List:
             index_points.append(i)
     return index_points
 
-def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transformer: rasterio.Affine) -> np.ndarray:
+def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transformer: rasterio.Affine, d):
     '''Replace in the raster band the use code from SIGPAC.
 
     Args:
@@ -280,10 +290,13 @@ def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transform
     Returns:
         arr (np.ndarray): Numpy array with band values changed to SIGPAC use code.
     '''
-
-    ind_values=[]
+    result = []
+    indexes = []
+    codes = []
+    ind_values = []
+    cd_uso = 0
     with fiona.open(path) as layer:
-        for feature in tqdm(layer):#TODO TQDM
+        for feature in tqdm(layer):
             ord_dict = feature['properties']
 
             for key in ord_dict.values():
@@ -293,14 +306,39 @@ def replace_band_matrix(path: str, points_list: list, arr: np.ndarray, transform
 
             for g in geometry:
                 ind_values = index_values(points_list, g)
+
                 if len(ind_values) != 0:
 
                     for ind in ind_values:
                         ind_arr = transformer.rowcol(points_list[ind][0],points_list[ind][1])
-                        arr[ind_arr[0],ind_arr[1]] = cd_uso #* replace the new use code from SIGPAC in the old band value.
-    # return arr
+                       # indexes.append(ind_arr)
+                       # codes.append(cd_uso)
+                        result.append((ind_arr, cd_uso))
+                        #arr[ind_arr[0],ind_arr[1]] = cd_uso #* replace the new use code from SIGPAC in the old band value.
+    # d["ind"] = indexes 
+    # d["codes"] = codes
+    d[multiprocessing.current_process().pid] = result
 
-def multithreading(points_list: list, shp_path: str, arr: np.ndarray, transformer: rasterio.Affine) -> None:
+
+def replace_values(d: dict, arr: np.ndarray) -> np.ndarray: 
+    '''Swap the band values of the array with the values stored in the dictionary.
+
+    Args:
+        d (Dict): Dictionary with the band data stored.
+        arr (np.ndarray): Array with the data read from the raster.
+
+    Returns:
+        The array with the new values obtained.
+    '''
+
+    for item in tqdm(d.keys()):
+        for value in d[item]:
+            arr[value[0][0], value[0][1]] = value[1]
+
+    return arr             
+
+
+def multithreading(points_list: list, shp_path: str, arr: np.ndarray, transformer: rasterio.Affine) -> np.ndarray:
     '''Execute the process with multiple threads improving performance.
 
     Args:
@@ -313,19 +351,38 @@ def multithreading(points_list: list, shp_path: str, arr: np.ndarray, transforme
         None
     '''
 
-    chunked_list = np.array_split(points_list, 3)
+    cpu_num = multiprocessing.cpu_count()
+    chunked_list = np.array_split(points_list, cpu_num)
     size = len(chunked_list)
     p_list = []
+    p_result = []
+
+    # manager = multiprocessing.Manager()
+    # return_dict = manager.Array('i', range(1000))
+       
+    # for i in range(size):
+    #     with pool.Pool(processes=cpu_num) as mp_pool:
+    #         result = mp_pool.apply(replace_band_matrix, (shp_path, chunked_list[i], arr, transformer))
+    #         print(result)
+    # queue = multiprocessing.Queue()
+    manager = Manager()
+    d = manager.dict()  
 
     for i in range(size):
-        p = threading.Thread(target=replace_band_matrix, args=(shp_path, chunked_list[i], arr, transformer))
-        p.start()
+        # p = threading.Thread(target=replace_band_matrix, args=(shp_path, chunked_list[i], arr, transformer))
+        p = multiprocessing.Process(target=replace_band_matrix, args=(shp_path, chunked_list[i], arr, transformer, d))
         p_list.append(p)
+        p.start()
 
     for p in p_list:
         p.join() #* wait until all threads have finished
 
-def save_output_file(tif_path: str, shp_path: str,output_path: str):
+    new_arr = replace_values(d, arr)
+
+    return new_arr
+
+
+def save_output_file(shp_path: str, tif_path: str, output_path: str):
     '''Final raster file created.
 
     Read the given .tif, some metadata is saved and function replace_band_matrix() is called.
@@ -333,7 +390,7 @@ def save_output_file(tif_path: str, shp_path: str,output_path: str):
     Args:
         tif_path (str): Path to the tif image.
         shp_path (str): Path to the shapefile.
-        output_name (str): File name to be saved.
+        output_path (str): Path to be saved.
 
     Returns:
         Save in working directory the final image.
@@ -349,10 +406,10 @@ def save_output_file(tif_path: str, shp_path: str,output_path: str):
                         for i in tqdm(range(len(not_zero_indices[0])))] #* coordinates list of src values #TQDM
 
         #? matrix = replace_band_matrix(shp_path, points_list, arr, transformer)
-        multithreading(points_list, shp_path, arr, transformer)
+        new_arr = multithreading(points_list, shp_path, arr, transformer)
 
         with rasterio.open(output_path, 'w', **profile) as dst:
-            dst.write(arr, 1)
+            dst.write(new_arr, 1)
 
 # save_output_file("./masked_shp/AVILA/avilaMasked.tif",
 #                 "./Shapefile_Data/AVILA/05_RECFE.shp",
@@ -375,21 +432,25 @@ def read_masked_files(folder_path: str, shp_data_folder: str, sigpac_data_folder
 
     for file in folder_files:
         file_number = file.split('.')[0]
+
         #? os.path.getsize(folder_path+f"{file}") < 8000000 and
         if file_number[0:5]+f"_sigpac.tif" not in os.listdir(sigpac_data_folder):
             print(file)
-            save_output_file(folder_path+f"/{file}",
-                            shp_data_folder+f"/sp22_REC_21{file_number[2:5]}.shp",
-                            sigpac_data_folder+f"21{file_number[2:5]}_sigpac.tif")
-            print("")
+            
+            save_output_file(shp_data_folder+f"/{file[:5]}_RECFE.shp",
+                folder_path+f"/{file}",
+                sigpac_data_folder+f"{file[:5]}_sigpac.tif")            
             print(file+" finished")
+            print("")
 
-# read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/CADIZ/")
+
+#read_masked_files("/home/jesus/Documents/satelite_images_sigpac/masked_shp/CADIZ/")
+
 
 #!---------------------------------------------------------------------------------------------------------------------------------------
 
-def raster_comparison(rows: int,cols: int, new_raster_output: np.ndarray, 
-    style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray) -> np.ndarray:
+def raster_comparison(rows: int,cols: int, new_raster_output, 
+    style_sheet, sigpac_band, classification_band) -> np.ndarray:
     '''This function compares the band values of two different raster. These values 
     are linked with the crop_style_sheet.json file. Both rasters must have the same size.
 
@@ -434,8 +495,8 @@ def raster_comparison(rows: int,cols: int, new_raster_output: np.ndarray,
         pass
     return new_raster_output
 
-def raster_comparison_cropland(rows: int,cols: int, new_raster_output: np.ndarray, 
-    style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray) -> np.ndarray:
+def raster_comparison_cropland(rows: int,cols: int, new_raster_output, 
+    style_sheet, sigpac_band, classification_band):
     '''This function compares the crop zones in both land covers given by parameters.
     These values are linked with the id_style_sheet.json file. Both rasters must have the same size.
 
@@ -477,8 +538,8 @@ def raster_comparison_cropland(rows: int,cols: int, new_raster_output: np.ndarra
         pass
     return new_raster_output
 
-def specific_class_raster_comparison(rows: int,cols: int, new_raster_output: np.ndarray, 
-    style_sheet: str, sigpac_band: np.ndarray, classification_band: np.ndarray) -> np.ndarray:
+def specific_class_raster_comparison(rows: int,cols: int, new_raster_output, 
+    style_sheet, sigpac_band, classification_band):
     '''This function compares the crop zones in both land covers given by parameters.
     These values are linked with the id_style_sheet.json file. Both rasters must have the same size.
 
@@ -611,17 +672,18 @@ def crop_metrics(sigpac_band, classification_band, output_path):
         # data_output.loc['FN',cont] = fn
         try:
             hit_rate = tp/(tp+fn)
+            hr.append(hit_rate)
+
         except ZeroDivisionError:
             pass
         # data_output.loc['Hit rate',cont] = hit_rate
-        hr.append(hit_rate)
 
-    data_output.loc["TP"] = truep
-    data_output.loc["FN"] = falsen
-    data_output.loc["Hit rate"] = hr
+        # data_output.loc["TP"] = truep
+        # data_output.loc["FN"] = falsen
+        # data_output.loc["Hit rate"] = hr
 
-    print(data_output)
-    data_output.to_csv(output_path) 
+        print(data_output)
+        data_output.to_csv(output_path) 
 
 # crop_metrics(sigpac_band, classification_band)
 
@@ -659,7 +721,7 @@ def process_dataframe(data_path):
 # process_dataframe("./csv/andalucia_tp_tn.csv")
 
 # "./raster_comparison_malaga.tif"
-def validation(path: str) -> float:
+def validation(path: str) -> Tuple[float, float]:
     '''With a given compared raster, create a 2x2 confusion matrix 
     to validate the lab raster's performance crop classification.
 
@@ -788,7 +850,7 @@ def graphs():
 
 def prueba_de_uk():
 
-    with fiona.open("C:\TFG_resources\RPA_CropMapOfEngland2020CAM_SHP_Full\data\Crop_Map_of_England_2020_Cambridgeshire.shp", "r") as json_cambridge:
+    with fiona.open("C:/TFG_resources/RPA_CropMapOfEngland2020CAM_SHP_Full/data/Crop_Map_of_England_2020_Cambridgeshire.shp", "r") as json_cambridge:
         print(json_cambridge)
         # shapes = [feature["geometry"] for feature in json_cambridge]
         for feature in json_cambridge:
@@ -800,7 +862,7 @@ def prueba_de_uk():
 # prueba_de_uk()
 
 def prueba_corine_tiff():
-  with rasterio.open("C:\TFG_resources\satelite_img\W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
+  with rasterio.open("C:/TFG_resources/satelite_img/W020N60_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", "r") as src:
     band = src.read()
     print(band)
     rows = band.shape[0] #* 16555
