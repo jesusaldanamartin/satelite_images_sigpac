@@ -354,3 +354,6 @@ Script workflow:
 #TODO Refactor all the code and the github.
 #TODO Finish the ipynb and upload custom example.
 
+## 23/02/2023
+
+Bash script almost finished, fix the raster creator for the compared rasters. After that finish metrics calculator and csv export with some graphs in png format and it is finished.

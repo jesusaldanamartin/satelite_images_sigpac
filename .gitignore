@@ -1,13 +1,4 @@
-masked_shp/*
-masked_sigpac/*
-Shapefile_Data/*
-results2/*
-.env
-*.aux
-*.aux.xml
 __pycache__
-UK_CORINE
-updated_classification
 *.tif
 dataset_postprocessed.csv
 data/
