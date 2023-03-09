@@ -5,7 +5,7 @@ Final degree project for University of Malaga at Khaos Research. Author: Jesús 
 
 ## Description
 
-This repository contains the code to validate land cover using the SIGPAC data of the Ministry of Agriculture, Fisheries and Food of Spain. The code is written in python. In order to execute the script you must have a shapefile and a raster of the land you want to validate. 
+This repository contains the code to validate land cover. In order to execute the app you must have Python3 installed in your machine. The example uploaded use the SIGPAC data of the Ministry of Agriculture, Fisheries and Food of Spain. Data: (https://www.juntadeandalucia.es/organismos/agriculturapescaaguaydesarrollorural/servicios/sigpac/visor/paginas/sigpac-descarga-informacion-geografica-shapes-provincias.html)
 
 ## Contents
 

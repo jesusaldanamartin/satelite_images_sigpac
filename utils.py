@@ -5,8 +5,8 @@ from rasterio import (
 )
 
 from rasterio.warp import (
-    Resampling, 
-    reproject, 
+    Resampling,
+    reproject,
     calculate_default_transform
 )
 
@@ -116,27 +116,27 @@ def get_id_codigo_uso(key: str):
 
 
 def reproject_raster(in_path: str, out_path: str, file_name: str, new_crs):
-    '''Given an in and out path this function reproject a raster into any coordinate reference system set
+    '''Given an in and out path this function reproject a raster into any coordinate reference system set.
 
     Args:
         in_path (str): Path to the raster we want to reproject.
         out_path (str):  Output path where the raster will be saved.
+        file_name (str): Name of the new raster.
+        new_crs (str): New coordinate reference system (EPSG:4258 ETRS89).
 
     Return:
-        None
+        Save the new raster in out_path.
     '''
-    #  -
-    crs = "EPSG:4258 ETRS89"
-    crs = new_crs
+
     # reproject raster to project crs
     with rasterio.open(in_path) as src:
         src_crs = src.crs
         transform, width, height = calculate_default_transform(
-            src_crs, crs, src.width, src.height, *src.bounds)
+            src_crs, new_crs, src.width, src.height, *src.bounds)
         kwargs = src.meta.copy()
 
         kwargs.update({
-            'crs': crs,
+            'crs': new_crs,
             'transform': transform,
             'width': width,
             'height': height})
@@ -148,7 +148,7 @@ def reproject_raster(in_path: str, out_path: str, file_name: str, new_crs):
                 src_transform=src.transform,
                 src_crs=src.crs,
                 dst_transform=transform,
-                dst_crs=crs,
+                dst_crs=new_crs,
                 resampling=Resampling.nearest)
 
 
@@ -161,7 +161,7 @@ def mask_shp(shp_path: str, tif_path: str, output_name: str):
         output_name (str): File name to be saved.
 
     Returns:
-        Save in working directory the image croppped.
+        Save the tif cropped in working directory.
     '''
 
     with fiona.open(shp_path, "r") as shapefile:
@@ -194,7 +194,7 @@ def masked_all_shapefiles_in_directory(folder_path: str, output_path: str, mask:
         mask (str) : Path to the .tif image that is going to be used to mask the shapefiles.
 
     Return:
-        A file is created for each shapefile in folder.
+        A masked file is created for each shapefile in the folder.
     '''
 
     folder_files = os.listdir(folder_path)
@@ -216,11 +216,12 @@ def merge_tiff_images_in_directory(folder_path: str, output_path: str, file_name
 
     Args:
 
-        output_name (str): Name as the output file will be stored.
         folder_path (str): Path to the folder where tiff images are.
+        output_name (str): Name as the output file will be stored.
+        file_name (str): Name of the file to be saved.
 
     Returns: 
-        The merged image will be stored in working directory.
+        The merged image will be stored in the working directory.
     '''
 
     src_files_to_mosaic = []
@@ -361,7 +362,7 @@ def replace_values(d: dict, arr: np.ndarray) -> np.ndarray:
 
     for item in tqdm(d.keys()):
         for value in d[item]:
-            #* replace the new use code from SIGPAC in the old band value.
+            # * replace the new use code from SIGPAC in the old band value.
             arr[value[0][0], value[0][1]] = value[1]
     return arr
 
@@ -407,8 +408,8 @@ def save_output_file(shp_path: str, tif_path: str, output_path: str):
     Read the given .tif, some metadata is saved and function replace_band_matrix() is called.
 
     Args:
-        tif_path (str): Path to the tif image.
         shp_path (str): Path to the shapefile.
+        tif_path (str): Path to the tif image.
         output_path (str): Path to be saved.
 
     Returns:
@@ -449,13 +450,19 @@ def read_masked_files(folder_path: str, shp_data_folder: str, sigpac_data_folder
     folder_files = os.listdir(folder_path)
 
     for file in folder_files:
-        file_name = file.split('.')[0]
+        file_name = file.split('_')[0]
 
         if file_name+f"_sigpac.tif" not in os.listdir(sigpac_data_folder):
             print(file)
 
-            save_output_file(shp_data_folder+f"/{file[:-9]}.shp",
+            save_output_file(shp_data_folder+f"/{file[:-11]}_RECFE.shp",
                              folder_path+f"/{file}",
                              sigpac_data_folder+f"{file_name}_sigpac.tif")
             print(file+" have finished")
             print("")
+
+
+# merge_tiff_images_in_directory("/home/jesus/Documents/TFG/satelite_images_sigpac/data/CastillaLeon/masked_Burgos", "/home/jesus/Documents/TFG/satelite_images_sigpac/data/","burgos_masked.tif")
+
+# read_masked_files("../satelite_images_sigpac/data/CastillaLeon/masked_Burgos/",
+#                   "../satelite_images_sigpac/data/CastillaLeon/09_Burgos", "../satelite_images_sigpac/data/CastillaLeon/sigpac_Burgos/")

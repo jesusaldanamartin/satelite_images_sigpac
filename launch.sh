@@ -75,6 +75,8 @@ if [ $# -eq 0 ]; then
     echo "Some arguments are required, please check out the usage guide"
     echo ""
     echo "$USAGE"
+    echo "For more information use -h|--help command"
+    echo ""
     exit 1
 fi
 
@@ -87,10 +89,10 @@ while true; do
         pip install -r ../satelite_images_sigpac/requirements.txt
         echo ""
 
-        if [ ! -d "$data_prueba" ]; then
-            mkdir -p data_prueba/tmp/masked
-            mkdir -p data_prueba/tmp/sigpac
-            mkdir -p data_prueba/results
+        if [ ! -d "$data" ]; then
+            mkdir -p data/tmp/masked
+            mkdir -p data/tmp/sigpac
+            mkdir -p data/results
         fi
 
         python3 run.py $RASTER_PATH $SHP_PATH $OUTPUT $tmp

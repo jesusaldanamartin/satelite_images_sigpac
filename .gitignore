@@ -1,4 +1,6 @@
 __pycache__
+.ipynb_checkpoints
 *.tif
 dataset_postprocessed.csv
 data/
+data_prueba/

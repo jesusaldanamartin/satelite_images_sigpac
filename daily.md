@@ -357,3 +357,23 @@ Script workflow:
 ## 23/02/2023
 
 Bash script almost finished, fix the raster creator for the compared rasters. After that finish metrics calculator and csv export with some graphs in png format and it is finished.
+
+## 03/06/2023
+
+Ejecutando Burgos entero para tener al menos una provincia entera terminada para comproabr que todo funciona correctamente. Tras esto falta comprobar que funciona correctamente dejando ejecutando otra provincia de Castilla y Leon. Después (hacer grafos de los csv resultantes para que quede más bonito) y terminar la parte de machine learning. 
+
+Paralelizando el codigo de validation para las comparaciones... esta con error ahora mismo luefgo ir a .40 y ejecutar ahi.
+
+ERROR:
+
+Generating metrics: 
+3
+2
+56920
+2
+Traceback (most recent call last):
+  File "/home/jesus/Documents/TFG/satelite_images_sigpac/validation.py", line 300, in <module>
+    
+  File "/home/jesus/Documents/TFG/satelite_images_sigpac/validation.py", line 185, in create_dataframe_metrics_crops
+    values_sg = sigpac_band[index_not_crop]
+TypeError: 'int' object is not iterable

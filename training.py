@@ -10,11 +10,7 @@ from sklearn.model_selection import train_test_split
 
 from training_ml import _feature_reduction, compute_confusion_matrix
 
-# from landcoverpy.config import settings
-# from landcoverpy.minio import MinioConnection
-# from landcoverpy.utilities.confusion_matrix import compute_confusion_matrix
-
-TMP_DIR = "/dh"
+TMP_DIR = "/dataset_postprocessed.csv"
 
 def train_model_land_cover(land_cover_dataset: str, n_jobs: int = 2):
     """Trains a Random Forest model using a land cover dataset."""

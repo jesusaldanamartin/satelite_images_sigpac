@@ -15,17 +15,18 @@ TEMPORARY_FILES = sys.argv[4]
 # * prueba_de_script
 # * yes
 
-TMP_PATH = "../satelite_images_sigpac/data_prueba/tmp/"
-OUTPUT = "../satelite_images_sigpac/data_prueba/results/"
+TMP_PATH = "../satelite_images_sigpac/data/tmp/"
+OUTPUT = "../satelite_images_sigpac/data/results/"
 
 
 # DONE #TODO Update script now check if arguments are file or folders. If folder call folder functions.
-# DONE # TODO Update launch.sh It must get arguments and options via terminal. With help, version, usage.
+# DONE #TODO Update launch.sh It must get arguments and options via terminal. With help, version, usage.
 # PARTIAL DONE # TODO Fix the way the files are obtained, better functions instead of split. ¿Contains?
+# PARTIAL DONE  # TODO Finish script with the comparison rasters, csv.
 
-# TODO Finish script with the comparison rasters, csv and graphs.
+# TODO Graphs
 # TODO ONCE bash script is finished , continue with ml
-# TODO Add the new machine learning workflow to the bash script.
+# No hace falta, ese modelo va a parte # TODO Add the new machine learning workflow to the bash script.
 # TODO Finish the showcase.ipynb and upload custom example.
 # TODO Refactor all the code.
 # TODO Start the TFG memory essay
@@ -45,11 +46,11 @@ if tif_crs != shp_crs:
 if os.path.isfile(SHP_PATH):
 
     print("Creating mask of the shapefile")
-    mask_shp(SHP_PATH, TIFF_PATH, TMP_PATH+OUT_FILENAME+"_mask.tif")
+    mask_shp(SHP_PATH, TIFF_PATH, OUTPUT+OUT_FILENAME+"_mask.tif")
     print("")
 
     print("Creating new raster with the new band values")
-    save_output_file(SHP_PATH, TMP_PATH+OUT_FILENAME +
+    save_output_file(SHP_PATH, OUTPUT+OUT_FILENAME +
                      "_mask.tif", OUTPUT+OUT_FILENAME+"_sigpac.tif")
     print("")
     print(f"The validation raster has been saved in: {OUTPUT}")
@@ -75,58 +76,20 @@ else:
     print(f"The outcome rasters has been saved in: {OUTPUT}")
     print("")
 
+rows, cols, metadata, style, msk_band, sgc_band = read_needed_files(
+    "../satelite_images_sigpac/json/crop_style_sheet.json", OUTPUT+OUT_FILENAME+"_mask.tif", OUTPUT+OUT_FILENAME+"_sigpac.tif")
+
+print("Generating True/False raster: ")
+raster_comparison(rows, cols, metadata, OUTPUT +
+                  "red_green.tif", style, msk_band, sgc_band)
+
+print("Generating confusion matrix raster: ")
+raster_comparison_confmatrix(
+    rows, cols, metadata, OUTPUT+"_conf_matrix.tif", style, msk_band, sgc_band)
+
+print("Generating metrics and graphs: ")
+create_dataframe_metrics_crops(msk_band, sgc_band, OUTPUT +
+                         OUT_FILENAME+"_metrics.csv")
+
 if TEMPORARY_FILES == "yes":
     shutil.rmtree(TMP_PATH)
-
-rows, cols, metadata, style, msk_band, sgc_band = read_needed_files(
-    "../satelite_images_sigpac/json/id_style_sheet.json", OUTPUT+OUT_FILENAME+"_mask.tif", OUTPUT+OUT_FILENAME+"_sigpac.tif")
-
-raster_comparison(rows, cols, metadata, OUTPUT+"exact_comparison2.tif", style, msk_band, sgc_band)
-
-raster_comparison_cropland(rows, cols, metadata, OUTPUT+"class_comparison_matrix2.tif", style, msk_band, sgc_band)
-
-# reproject_raster("./satelite_images_sigpac/data/sat_images/spain30T.tif",
-#     "./satelite_images_sigpac/data/sat_images/", "spain30T_4258.tif")
-
-# merge_tiff_images_in_directory("./satelite_images_sigpac/data/sat_images/spain_30T",
-#     "./satelite_images_sigpac/data/sat_images/", "spain30T.tif")
-
-
-# * MASK SINGLE FILE
-# mask_shp("./satelite_images_sigpac/data/CastillaLeon/09_Burgos/09001_RECFE.shp",
-#          "./satelite_images_sigpac/data/sat_images/spain30T_4258.tif",
-#         "burgos_09001_croppped.tif")
-
-# * MASK FOLDER OF SHP
-# masked_all_shapefiles_in_directory("./satelite_images_sigpac/data/CastillaLeon/09_Burgos/",
-#      "./satelite_images_sigpac/data/CastillaLeon/masked_Burgos/",
-#      "./satelite_images_sigpac/data/sat_images/spain30T_4258.tif")
-
-# * MERGE ALL TIFFS FROM FOLDER
-# merge_tiff_images_in_directory("./masked_shp/HUELVA/","./results/huelva/huelvaMasked.tif")
-
-# * SINGLE RASTER OUTPUT
-# save_output_file("./satelite_images_sigpac/data/CastillaLeon/09_Burgos/09001_RECFE.shp",
-#                 "burgos_09001_croppped.tif",
-#                 "nucleos_process3_burgos_09001_sigpac.tif")
-
-# * FOLDER RASTER OUTPUT
-# read_masked_files("./satelite_images_sigpac/data/CastillaLeon/masked_Burgos/",
-#     "./satelite_images_sigpac/data/CastillaLeon/09_Burgos",
-#     "./satelite_images_sigpac/data/CastillaLeon/sigpac_Burgos/")
-
-# * FUNCTIONS USED TO VALIDATE THE RASTER
-#def results_validation():
-
-    # style_sheet, sigpac_band, classification_band = apply_style_sheet_to_raster("./json/olive_style_sheet.json",
-    #     "./results/huelva/huelvaMask_sigpac.tif",
-    #     "./results/huelva/huelvaMasked.tif")
-
-    # crops_hit_rate_to_json(style_sheet, sigpac_band, classification_band, "hit_rate.json")
-    # x,y = validation("./results/malaga/raster_comparison_malaga.tif")
-    # crop_metrics(sigpac_band, classification_band, 'csv/huelva.csv')
-
-    #results_validation()
-
-# * ANDALUCIA CSV
-# process_dataframe("./csv/andalucia_tp_tn.csv")
