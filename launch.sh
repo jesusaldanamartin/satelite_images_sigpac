@@ -1,4 +1,24 @@
 #!/bin/bash
+#?wget -r --user-agent="Mozilla" http://ftp.itacyl.es/cartografia/05_SIGPAC/2021_ETRS89/Parcelario_SIGPAC_CyL_Municipios/47_Valladolid/
+#? 
+
+# Here are a few suggestions to improve the Bash script:
+
+#     Error messages: When the user enters an invalid option or a required argument is missing, the script currently exits with an error code of 1, but it would be better to print a descriptive error message as well.
+
+#     Consistent variable names: Some variables in the script have inconsistent names, which can make the code harder to read and understand. For example, the script uses both "tmp" and "DELETE_TMP" to refer to the same thing.
+
+#     Use functions: The script could be more modular and easier to read if some of the code were encapsulated in functions. For example, the code that creates the temporary directories could be put in a separate function.
+
+#     Check for dependencies: Before running the script, it would be a good idea to check that all the required dependencies are installed. For example, the script currently assumes that "pip" is available, but this may not always be the case.
+
+#     Improve user interface: The script could be improved by providing more informative messages to the user, such as progress updates or warnings about potential issues.
+
+#     Improve parameter validation: The script currently checks whether the -t argument is "yes" or "no", but it would be better to use a case-insensitive comparison and to provide a more informative error message if an invalid option is entered.
+
+#     Use shellcheck: It is always a good idea to run your Bash scripts through a static analysis tool like shellcheck to catch potential issues.
+
+# Overall, the script looks well-structured and easy to read, but there is room for improvement in terms of error handling, modularity, and user interface.
 
 # Global variables
 APP_NAME="Satellite image validator with SIGPAC data"
@@ -89,7 +109,7 @@ while true; do
         pip install -r ../satelite_images_sigpac/requirements.txt
         echo ""
 
-        if [ ! -d "$data" ]; then
+        if [[ ! -d "$data" ]]; then
             mkdir -p data/tmp/masked
             mkdir -p data/tmp/sigpac
             mkdir -p data/results

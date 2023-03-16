@@ -206,7 +206,8 @@ def masked_all_shapefiles_in_directory(folder_path: str, output_path: str, mask:
                 mask_shp(folder_path+f"/{file}", mask,
                          output_path+f"{file_name}_mask.tif")
             except ValueError:
-                print(file+" does not overlap figure")
+                #print(file+" does not overlap figure")
+                pass
 
 
 def merge_tiff_images_in_directory(folder_path: str, output_path: str, file_name: str):
@@ -232,7 +233,6 @@ def merge_tiff_images_in_directory(folder_path: str, output_path: str, file_name
         src = rasterio.open(folder_path+f"/{file}")
         src_files_to_mosaic.append(src)
         src_crs = src.crs  # * For a new custom crs output
-
         out_meta = src.meta.copy()
 
     mosaic, out_trans = merge.merge(src_files_to_mosaic)
@@ -241,7 +241,9 @@ def merge_tiff_images_in_directory(folder_path: str, output_path: str, file_name
                      "height": mosaic.shape[1],
                      "width": mosaic.shape[2],
                      "transform": out_trans,
-                     "crs": "+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs"
+                     "crs": "EPSG:4258"
+                     #EPSG:32629
+                     #"+proj=utm +zone=30 +ellps=WGS84 +units=m +no_defs"
                      }
                     )
     try:
@@ -451,18 +453,27 @@ def read_masked_files(folder_path: str, shp_data_folder: str, sigpac_data_folder
 
     for file in folder_files:
         file_name = file.split('_')[0]
-
+        # print(file_name)
+        # print(file)
         if file_name+f"_sigpac.tif" not in os.listdir(sigpac_data_folder):
             print(file)
 
-            save_output_file(shp_data_folder+f"/{file[:-11]}_RECFE.shp",
+            save_output_file(shp_data_folder+f"/{file_name}_RECFE.shp",
                              folder_path+f"/{file}",
                              sigpac_data_folder+f"{file_name}_sigpac.tif")
             print(file+" have finished")
             print("")
 
 
-# merge_tiff_images_in_directory("/home/jesus/Documents/TFG/satelite_images_sigpac/data/CastillaLeon/masked_Burgos", "/home/jesus/Documents/TFG/satelite_images_sigpac/data/","burgos_masked.tif")
+#? exec
+#merge_tiff_images_in_directory("/home/jesus/Documents/TFG/satelite_images_sigpac/data/sat_images/entre29_30", "/home/jesus/Documents/TFG/satelite_images_sigpac/data/sat_images/","spain29Tentre30T2.tif")
+# * (tfg_venv) jesus@jesus-XPS-15-9560:~/Documents/TFG/satelite_images_sigpac$ bash launch.sh -r /home/jesus/Documents/TFG/satelite_images_sigpac/data/sat_images/spain/spain30T.tif -s /home/jesus/Documents/TFG/satelite_images_sigpac/data/ftp.itacyl.es/cartografia/05_SIGPAC/2021_ETRS89/Parcelario_SIGPAC_CyL_Municipios/47_Valladolid -o  valladolid -t no
 
-# read_masked_files("../satelite_images_sigpac/data/CastillaLeon/masked_Burgos/",
-#                   "../satelite_images_sigpac/data/CastillaLeon/09_Burgos", "../satelite_images_sigpac/data/CastillaLeon/sigpac_Burgos/")
+#reproject_raster("/home/jesus/Documents/TFG/satelite_images_sigpac/data/sat_images/spain/spain29T.tif","/home/jesus/Documents/TFG/satelite_images_sigpac/data/sat_images/","spain29T_4258.tif","EPSG:4258 ETRS89")
+
+# masked_all_shapefiles_in_directory("/home/jesus/Documents/TFG/satelite_images_sigpac/data/ftp.itacyl.es/cartografia/05_SIGPAC/2021_ETRS89/Parcelario_SIGPAC_CyL_Municipios/47_Valladolid", 
+#   "/home/jesus/Documents/TFG/satelite_images_sigpac/data/tmp/sigpac", "/home/jesus/Documents/TFG/satelite_images_sigpac/data/sat_images/spain/spain30T.tif")
+
+# read_masked_files("/home/jesus/Documents/TFG/satelite_images_sigpac/data/tmp/masked",
+#                   "/home/jesus/Documents/TFG/satelite_images_sigpac/data/ftp.itacyl.es/cartografia/05_SIGPAC/2021_ETRS89/Parcelario_SIGPAC_CyL_Municipios/47_Valladolid", "/home/jesus/Documents/TFG/satelite_images_sigpac/data/tmp/sigpac")
+

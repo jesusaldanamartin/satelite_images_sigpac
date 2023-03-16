@@ -4,7 +4,7 @@ import numpy as np
 from typing import Tuple
 import rasterio
 import json
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 
 def read_needed_files(json_path: str, masked_path: str, sigpac_path: str):
@@ -177,7 +177,7 @@ def create_dataframe_metrics_crops(classification_band, sigpac_band, output_path
         falsen.append(fn)
 
         try:
-            hit_rate = tp/(tp+fn)
+            hit_rate = (tp/(tp+fn))*100
             round(hit_rate, 3)
             hr.append(hit_rate)
 
@@ -237,22 +237,33 @@ def validation(path: str) -> Tuple[float, float]:
         print("-------------------------------------")
 
 
-def graphs():
-    with open("/home/jesus/Documents/satelite_images_sigpac/csv/andalucia.csv", mode='r') as file:
-        df = pd.read_csv(file)
-        print(df.iloc[[1]])
-        plt.bar(df.iloc[[3]], df.iloc[[0]], 'o')
-        plt.show()
-    return
+# Datos de la tabla
+clase = ['Citricos Frutal', 'Citricos', 'Citricos-Frutal de cascara', 'Citricos-Viñedo', 'Frutal de Cascara-Frutal', 'Frutal de Cascara-Olivar', 'Frutal de Cascara', 'Frutal de Cascara-Viñedo', 'Frutal', 'Imvernadero y cultivos bajo plastico', 'Olivar-Citricos', 'Olivar-Frutal', 'Olivar', 'Tierra Arable', 'Huerta', 'Frutal-Viñedo', 'Viñedo', 'Olivar-Viñedo']
+aciertos = [89403, 5856071, 1545, 2950975, 7312, 82857, 9080721, 3806, 4774161, 771053, 36820, 30066, 72449454, 105376719, 570850, 35013, 1122568, 55533]
+fallos = [979897, 2185685, 7154, 1059, 831503, 196400, 11096748, 8630, 9937804, 4243997, 73883, 63609, 90171231, 55991331, 667416, 63879, 1251335, 92121]
+porcentaje_acierto = [8.36, 72.82, 17.76, 99.96, 0.87, 29.67, 45.0, 30.6, 32.45, 15.37, 33.26, 32.1, 44.55, 65.3, 46.1, 35.41, 47.29, 37.61]
+num_pixeles = [1069300, 8041756, 8699, 2952034, 838815, 279257, 20177469, 12436, 14711965, 5015050, 110703, 93675, 162620685, 161368050, 1238266, 98892, 2373903, 147654]
 
-# plt.plot(x2,y2,'o')
-# plt.plot(x3,y3,'o')
-# plt.plot(x4,y4,'o')
-# plt.xlim((0,1))
-# plt.ylim((0,1))
-# plt.xlabel('False Positive Rate')
-# plt.ylabel('True Positive Rate')
-# plt.show()
+# Configuración del gráfico
+x = np.arange(len(clase))
+width = 0.25
+
+fig, ax = plt.subplots()
+rects1 = ax.bar(x - width, aciertos, width, label='Aciertos')
+rects2 = ax.bar(x, fallos, width, label='Fallos')
+rects3 = ax.bar(x + width, porcentaje_acierto, width, label='Porcentaje de Acierto')
+
+# Configuración de los ejes y etiquetas
+ax.set_ylabel('Cantidad')
+ax.set_title('Resultados de clasificación')
+ax.set_xticks(x)
+ax.set_xticklabels(clase, rotation=90)
+ax.legend()
+
+fig.tight_layout()
+
+plt.show()
+
 
 #? exec
 

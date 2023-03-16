@@ -1,6 +1,7 @@
 __pycache__
 .ipynb_checkpoints
 *.tif
-dataset_postprocessed.csv
+csv/dataset_postprocessed.csv
 data/
 data_prueba/
+vm_data/

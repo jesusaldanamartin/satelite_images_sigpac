@@ -377,3 +377,24 @@ Traceback (most recent call last):
   File "/home/jesus/Documents/TFG/satelite_images_sigpac/validation.py", line 185, in create_dataframe_metrics_crops
     values_sg = sigpac_band[index_not_crop]
 TypeError: 'int' object is not iterable
+
+
+# 09/03/2023
+
+Me quedao por villacervos descargando SORIA
+
+# 10/03/2023 
+
+Terminar CyL.
+
+# 15/03/2023
+
+Automatas celulares para predecir el crecimiento urbano o cultivo. Para ello descargar un municipio o dos contiguos a los que aplicarle el flujo de trabajo. Descargarlos del corine de distintas fechas separadas por años. Tras eso crear las reglas del AC basandome en algunas papers que he encontrado. Para el AHP, puedo buscar elevaciones datos de densidad de poblacion y de rutas de transporte para transformar los raster de estudio en estos nuevos rasters. Y aplicar la reglas de Cadenas de Markov junto a los AC para predecir los cambios en el terreno para el 2050.
+
+# 17/03/2023
+
+Comenzar parte final del tfg (ML).
+
+Modificar los hiperparámetros del train_model_land_cover() para obtener un model.bin, ejecutar el landcover.py para obtener los rasters clasificados ejecutar mi algoritmo y obtener los resultados de validación nuevo.
+
+Carpetas de Mini0 y Repositorio privado python etc.
