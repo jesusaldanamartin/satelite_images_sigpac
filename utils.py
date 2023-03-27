@@ -432,6 +432,10 @@ def save_output_file(shp_path: str, tif_path: str, output_path: str):
         new_arr = start_parallel_execution(
             points_list, shp_path, arr, transformer)
 
+        profile.update({
+            "crs": "EPSG:4258"
+        })
+
         with rasterio.open(output_path, 'w', **profile) as dst:
             dst.write(new_arr, 1)
 

@@ -30,8 +30,9 @@ from validation import *
 
 
 # TODO Terminal de procesar CyL.
-# TODO Script de ML
+# TODO Obtener .env y ajustar mi script a su workflow.
 # TODO Crear gráficas para mostrar los datos. (para poner en la memoria)
+
 # TODO OPCIONAL: Mejorar la forma de buscar los shp restantes para el sgc. ¿Contains?
 # TODO OPCIONAL: showcase.ipynb y ejemplo de uso simple (rápido) en repositorio.
 # TODO OPCIONAL: README.md
@@ -120,10 +121,8 @@ raster_comparison_confmatrix(
     rows, cols, metadata, OUTPUT+"_conf_matrix.tif", style, msk_band, sgc_band)
 
 logging.info("Generating metrics and graphs: ")
-create_dataframe_metrics_crops(msk_band, sgc_band, OUTPUT +
+create_dataframe_and_graphs(msk_band, sgc_band, OUTPUT +
                                OUT_FILENAME+"_metrics.csv")
-
-# graphs() #TODO
 
 if TEMPORARY_FILES == "yes":
     shutil.rmtree(TMP_PATH)

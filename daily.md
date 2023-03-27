@@ -398,3 +398,9 @@ Comenzar parte final del tfg (ML).
 Modificar los hiperparámetros del train_model_land_cover() para obtener un model.bin, ejecutar el landcover.py para obtener los rasters clasificados ejecutar mi algoritmo y obtener los resultados de validación nuevo.
 
 Carpetas de Mini0 y Repositorio privado python etc.
+
+Documento de MiniO
+
+# 27/03/2023
+
+Showcase python terminado. Organizando github. Dejando todo listo para el workflow.

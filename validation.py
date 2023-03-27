@@ -1,13 +1,13 @@
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
-from typing import Tuple
+from typing import Tuple, IO
 import rasterio
 import json
 import matplotlib.pyplot as plt
 
 
-def read_needed_files(json_path: str, masked_path: str, sigpac_path: str):
+def read_needed_files(json_path: str, masked_path: str, sigpac_path: str):# -> Tuple(int, int, str, dict, np.ndarray, np.ndarray):
     '''Read all files needed and call function raster_comparison_cropland() to compare both rasters.
 
     Args:
@@ -16,9 +16,12 @@ def read_needed_files(json_path: str, masked_path: str, sigpac_path: str):
         masked_path (str): Path to the classification raster (LAB).
 
     Returns:
+        rows_msk (int): Number of rows.
+        cols_msk (int): Number of columns.
+        out_meta (str): Output raster metadata.
         style_sheet (dict): Data obtained from json_path. 
-        classification_band (np.ndarray): Raster data read with rasterio.
-        sigpac_band (np.ndarray): Raster data read with rasterio.
+        classification_band (np.ndarray): Raster data, read with rasterio.
+        sigpac_band (np.ndarray): Raster data, read with rasterio.
     '''
 
     with open(json_path) as jfile:
@@ -46,7 +49,7 @@ def read_needed_files(json_path: str, masked_path: str, sigpac_path: str):
 
 
 def raster_comparison(rows: int, cols: int, metadata, output_path: str,
-                      style_sheet, classification_band, sigpac_band, cunk) -> np.ndarray:
+                      style_sheet: dict, classification_band: np.ndarray, sigpac_band: np.ndarray) -> IO:
     '''This function compares the band values of two different raster. These values 
     are linked with the crop_style_sheet.json file. Both rasters must have the same size.
 
@@ -94,8 +97,8 @@ def raster_comparison(rows: int, cols: int, metadata, output_path: str,
         dest.write(new_raster_output, 1)
 
 
-def raster_comparison_confmatrix(rows: int, cols: int, metadata, output_path,
-                                 style_sheet, classification_band, sigpac_band):
+def raster_comparison_confmatrix(rows: int, cols: int, metadata: str, output_path: str,
+                                 style_sheet: dict, classification_band: np.ndarray, sigpac_band: np.ndarray) -> IO:
     '''This function compares the crop zones in both land covers given by parameters.
     These values are linked with the id_style_sheet.json file. Both rasters must have the same size.
 
@@ -140,10 +143,47 @@ def raster_comparison_confmatrix(rows: int, cols: int, metadata, output_path,
     except IndexError:
         pass
 
-    return new_raster_output, output_path
+    with rasterio.open(output_path, "w", **metadata) as dest:
+        dest.write(new_raster_output, 1)
 
 
-def create_dataframe_metrics_crops(classification_band, sigpac_band, output_path):
+def barplot(labels: list, aciertos: list, fallos: list, hr: list, npixels: list, output_path: str):
+
+    # Datos de la tabla
+    # labels = ['Citricos Frutal', 'Citricos', 'Citricos-Frutal de cascara', 'Citricos-Viñedo', 'Frutal de Cascara-Frutal', 'Frutal de Cascara-Olivar', 'Frutal de Cascara', 'Frutal de Cascara-Viñedo',
+    #          'Frutal', 'Imvernadero y cultivos bajo plastico', 'Olivar-Citricos', 'Olivar-Frutal', 'Olivar', 'Tierra Arable', 'Huerta', 'Frutal-Viñedo', 'Viñedo', 'Olivar-Viñedo']
+    # aciertos = [89403, 5856071, 1545, 2950975, 7312, 82857, 9080721, 3806, 4774161,
+    #             771053, 36820, 30066, 72449454, 105376719, 570850, 35013, 1122568, 55533]
+    # fallos = [979897, 2185685, 7154, 1059, 831503, 196400, 11096748, 8630, 9937804,
+    #           4243997, 73883, 63609, 90171231, 55991331, 667416, 63879, 1251335, 92121]
+    # hr = [8.36, 72.82, 17.76, 99.96, 0.87, 29.67, 45.0, 30.6,
+    #                       32.45, 15.37, 33.26, 32.1, 44.55, 65.3, 46.1, 35.41, 47.29, 37.61]
+    # num_pixeles = [1069300, 8041756, 8699, 2952034, 838815, 279257, 20177469, 12436,
+    #                14711965, 5015050, 110703, 93675, 162620685, 161368050, 1238266, 98892, 2373903, 147654]
+
+    # Configuración del gráfico
+    x = np.arange(len(labels))
+    width = 0.25
+
+    fig, ax = plt.subplots()
+    rects1 = ax.bar(x - width, aciertos, width, label='Aciertos')
+    rects2 = ax.bar(x, fallos, width, label='Fallos')
+    rects3 = ax.bar(x + width, hr,
+                    width, label='Porcentaje de acierto')
+
+    # Configuración de los ejes y etiquetas
+    ax.set_ylabel('Cantidad')
+    ax.set_title('Resultados de clasificación')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=90)
+    ax.legend()
+
+    fig.tight_layout()
+
+    plt.savefig(output_path+"_aciertos_fallos.png")
+
+
+def create_dataframe_and_graphs(classification_band: np.ndarray, sigpac_band: np.ndarray, output_path: str) -> IO:
     '''Create a Data Frame with all the metrics information obtained.
 
     Args:
@@ -152,7 +192,7 @@ def create_dataframe_metrics_crops(classification_band, sigpac_band, output_path
         output_path (str): Path to the directory where csv will be stored.
 
     Return:
-        CSV
+        out_csv (csv): File with the final metrics of the validation.
     '''
 
     out_csv = pd.DataFrame(columns=["Aciertos", "Fallos", "Porcentaje de acierto", "Num Pixeles"],
@@ -172,31 +212,31 @@ def create_dataframe_metrics_crops(classification_band, sigpac_band, output_path
 
         values_sg = sigpac_band[np.where(classification_band != 6)]
         fn = len(np.where(values_sg == crop_type)[0])
-
         truep.append(tp)
         falsen.append(fn)
-
         try:
             hit_rate = (tp/(tp+fn))*100
-            round(hit_rate, 3)
-            hr.append(hit_rate)
+            hr.append(round(hit_rate, 3))
 
         except ZeroDivisionError:
-            pass
+            hr.append(0)
 
+    labels = out_csv.index
     npixels = [truep[i] + falsen[i] for i in range(len(truep))]
 
     out_csv["Aciertos"] = truep
     out_csv["Fallos"] = falsen
-    out_csv["Porcentaje Aciertos"] = hr
+    out_csv["Porcentaje de acierto"] = hr
     out_csv["Num Pixeles"] = npixels
+
+    barplot(labels, truep, falsen, hr, npixels, "/home/jesus/Documents/TFG/satelite_images_sigpac/assets/images/img")
 
     print(out_csv)
 
     return out_csv.to_csv(output_path)
 
 
-def validation(path: str) -> Tuple[float, float]:
+def validation(path: str) -> str:
     '''With a given compared raster, create a 2x2 confusion matrix 
     to validate the lab raster's performance crop classification.
 
@@ -237,39 +277,15 @@ def validation(path: str) -> Tuple[float, float]:
         print("-------------------------------------")
 
 
-# Datos de la tabla
-clase = ['Citricos Frutal', 'Citricos', 'Citricos-Frutal de cascara', 'Citricos-Viñedo', 'Frutal de Cascara-Frutal', 'Frutal de Cascara-Olivar', 'Frutal de Cascara', 'Frutal de Cascara-Viñedo', 'Frutal', 'Imvernadero y cultivos bajo plastico', 'Olivar-Citricos', 'Olivar-Frutal', 'Olivar', 'Tierra Arable', 'Huerta', 'Frutal-Viñedo', 'Viñedo', 'Olivar-Viñedo']
-aciertos = [89403, 5856071, 1545, 2950975, 7312, 82857, 9080721, 3806, 4774161, 771053, 36820, 30066, 72449454, 105376719, 570850, 35013, 1122568, 55533]
-fallos = [979897, 2185685, 7154, 1059, 831503, 196400, 11096748, 8630, 9937804, 4243997, 73883, 63609, 90171231, 55991331, 667416, 63879, 1251335, 92121]
-porcentaje_acierto = [8.36, 72.82, 17.76, 99.96, 0.87, 29.67, 45.0, 30.6, 32.45, 15.37, 33.26, 32.1, 44.55, 65.3, 46.1, 35.41, 47.29, 37.61]
-num_pixeles = [1069300, 8041756, 8699, 2952034, 838815, 279257, 20177469, 12436, 14711965, 5015050, 110703, 93675, 162620685, 161368050, 1238266, 98892, 2373903, 147654]
+# ? exec
 
-# Configuración del gráfico
-x = np.arange(len(clase))
-width = 0.25
-
-fig, ax = plt.subplots()
-rects1 = ax.bar(x - width, aciertos, width, label='Aciertos')
-rects2 = ax.bar(x, fallos, width, label='Fallos')
-rects3 = ax.bar(x + width, porcentaje_acierto, width, label='Porcentaje de Acierto')
-
-# Configuración de los ejes y etiquetas
-ax.set_ylabel('Cantidad')
-ax.set_title('Resultados de clasificación')
-ax.set_xticks(x)
-ax.set_xticklabels(clase, rotation=90)
-ax.legend()
-
-fig.tight_layout()
-
-plt.show()
-
-
-#? exec
 
 # rows, cols, metadata, style, msk_band, sgc_band = read_needed_files(
-#     "./satelite_images_sigpac/json/crop_style_sheet.json", "/home/jesus/Documents/TFG/satelite_images_sigpac/data/jaen/jaenMasked.tif", "/home/jesus/Documents/TFG/satelite_images_sigpac/data/jaen/jaenMask_sigpac.tif")
+#     "./satelite_images_sigpac/json/crop_style_sheet.json", "/home/jesus/Documents/TFG/satelite_images_sigpac/results/malaga/malagaMasked.tif", "/home/jesus/Documents/TFG/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif")
 
+# raster_comparison(rows, cols, metadata, "/home/jesus/Documents/TFG/satelite_images_sigpac/results/malaga/malaga_redg    reen.tif",style, msk_band, sgc_band)
+
+#create_dataframe_and_graphs(msk_band, sgc_band, "/home/jesus/Documents/TFG/satelite_images_sigpac/csv/malaga_metrics.csv")
 # print("Generating True/False raster: ")
 # raster_comparison(rows, cols, metadata, "/home/jesus/Documents/TFG/satelite_images_sigpac/data/red_green.tif", style, msk_band, sgc_band)
 
