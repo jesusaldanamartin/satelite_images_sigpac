@@ -29,7 +29,7 @@ Code functions:
 To run locally the script you just need to install all libraries specified in the requirements.txt. The code below showw how can you do it.
 
 ```Python
-pip install -r requirements.txt
+python3 pip install -r requirements.txt
 ```
 
 ## Usage
@@ -37,22 +37,25 @@ pip install -r requirements.txt
 Use all the functions as you wish or run the whole workflow with the launch.sh app. In order to run the script please, replace the 'elements' with your own paths.
 
 ```Shell
-bash launch.sh -r 'raster path' -s 'shp path' -o 'output path' -t 'delete tmp'
+bash launch.sh -r <raster path> -s <shp path> -o <output path> -t <delete tmp>
 ```
 
-## Credits
+## Testing
+
+The framework used for the unit tests is pytests. In order to run the tests:
+
+```Python
+pytest tests/
+```
+
+## Output example
+
+![title](../satelite_images_sigpac/assets/images/sgpc.png)
+
+For extra information check out the [showcase.ipynb](showcase.ipynb) notebook.
 
 ---
 
 ## The MIT License (MIT)
 
-Copyright © 2023 <Yo>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-
+This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
