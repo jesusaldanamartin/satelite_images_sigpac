@@ -2,10 +2,16 @@ import sys
 import os
 import shutil
 import logging
+import rasterio
+import fiona
+
 from pathlib import Path
 
-from satelite_images_sigpac.src.utils import *
-from satelite_images_sigpac.src.validation import *
+#from src.utils import *
+#from src.validation import *
+
+from utils import mask_shp, save_output_file, masked_all_shapefiles_in_directory, merge_tiff_images_in_directory, read_masked_files, reproject_raster
+from validation import read_needed_files, raster_comparison, raster_comparison_confmatrix, create_dataframe_and_graphs
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import    ForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
