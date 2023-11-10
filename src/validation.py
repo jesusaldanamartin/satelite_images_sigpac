@@ -121,30 +121,58 @@ def raster_comparison_confmatrix(rows: int, cols: int, metadata: str, output_pat
     '''
 
     new_raster_output = np.copy(sigpac_band)
+    try:
+        for x in tqdm(range(rows)):
+            for y in range(cols):
+                if sigpac_band[x, y] != 0 and classification_band[x, y] != 0: #* Null data pass
+                    if classification_band[x, y] == 6:
+                        if 6 in style_sheet[str(sigpac_band[x, y])]:
+                            new_raster_output[x, y] = 1  # *True Positives (green)
+                        else:
+                            new_raster_output[x, y] = 2  # *False Positives (red)
+                    else:
+                        if 6 in style_sheet[str(sigpac_band[x, y])]:
+                            new_raster_output[x, y] = 3  # *False Negatives (blue)
+                        else:
+                            new_raster_output[x, y] = 4  # *True Negatives (black)
+    except IndexError:
+        pass
 
+    with rasterio.open(output_path, "w", **metadata) as dest:
+        dest.write(new_raster_output, 1)
+
+'''
     try:
         for x in tqdm(range(rows)):
             for y in range(cols):
                 if sigpac_band[x, y] != 0 and classification_band[x, y] != 0:
                     # print(style_sheet[str(sigpac_band[x,y])])
                     # print(classification_band[x,y])
-                    if style_sheet[str(sigpac_band[x, y])] == 6 and classification_band[x, y] == 6:
-                        if style_sheet[str(sigpac_band[x, y])] == classification_band[x, y]:
-                            # *True Positives (green)
-                            new_raster_output[x, y] = 1
+                    if classification_band[x, y] == 6 and str(sigpac_band[x, y]) in style_sheet:
+                        #if classification_band[x, y] == style_sheet[str(sigpac_band[x, y])] :
+                        if 6 in style_sheet[str(sigpac_band[x, y])]:
+                            new_raster_output[x, y] = 1 # *True Positives (green)
+                        else:
+                            new_raster_output[x, y] = 2  # * False Positive (red)
 
-                    elif classification_band[x, y] == 6 and style_sheet[str(sigpac_band[x, y])] != 6:
-                        new_raster_output[x, y] = 2  # * False Positive (red)
+                    elif classification_band[x, y] != 6 and str(sigpac_band[x, y]) in style_sheet:
+                        if 6 in style_sheet[str(sigpac_band[x, y])]:
+                            new_raster_output[x, y] = 3  # * False Negatives (blue)
+                        else:
+                            new_raster_output[x, y] = 4  # * True Negatives (black)
 
-                    elif classification_band[x, y] != 6 and style_sheet[str(sigpac_band[x, y])] == 6:
-                        new_raster_output[x, y] = 3  # * False Negatives (blue)
-                    else:
-                        new_raster_output[x, y] = 4  # * True Negatives (black)
+                             #elif classification_band[x, y] == 6 and str(sigpac_band[x, y]) in style_sheet:
+                        #if 6 not in style_sheet[str(sigpac_band[x, y])]:
+
+                   # elif classification_band[x,y] != 6 and str(sigpac_band[x, y]) in style_sheet:
+                        
+                    #    new_raster_output[x, y] = 4  # * True Negatives (black)
     except IndexError:
         pass
 
     with rasterio.open(output_path, "w", **metadata) as dest:
         dest.write(new_raster_output, 1)
+'''
 
 
 def barplot(labels: list, aciertos: list, fallos: list, hr: list, npixels: list, output_path: str):
@@ -224,14 +252,14 @@ def create_dataframe_and_graphs(classification_band: np.ndarray, sigpac_band: np
     labels = out_csv.index
     npixels = [truep[i] + falsen[i] for i in range(len(truep))]
 
+    out_csv["Num Pixeles"] = npixels
     out_csv["Aciertos"] = truep
     out_csv["Fallos"] = falsen
     out_csv["Porcentaje de acierto"] = hr
-    out_csv["Num Pixeles"] = npixels
 
-    barplot(labels, truep, falsen, hr, npixels, "/home/jesus/Documents/TFG/satelite_images_sigpac/assets/images/img")
+    #barplot(labels, truep, falsen, hr, npixels, "/home/jesus/Documents/TFG/satelite_images_sigpac/assets/images/img")
 
-    print(out_csv)
+    #print(out_csv)
 
     return out_csv.to_csv(output_path)
 
@@ -279,18 +307,17 @@ def validation(path: str) -> str:
 
 # ! exec
 
-
-# rows, cols, metadata, style, msk_band, sgc_band = read_needed_files(
+#rows, cols, metadata, style, msk_band, sgc_band = read_needed_files(
 #     "./satelite_images_sigpac/json/crop_style_sheet.json", "/home/jesus/Documents/TFG/satelite_images_sigpac/results/malaga/malagaMasked.tif", "/home/jesus/Documents/TFG/satelite_images_sigpac/results/malaga/malagaMask_sigpac.tif")
 
 # raster_comparison(rows, cols, metadata, "/home/jesus/Documents/TFG/satelite_images_sigpac/results/malaga/malaga_redg    reen.tif",style, msk_band, sgc_band)
 
 #create_dataframe_and_graphs(msk_band, sgc_band, "/home/jesus/Documents/TFG/satelite_images_sigpac/csv/malaga_metrics.csv")
 # print("Generating True/False raster: ")
-# raster_comparison(rows, cols, metadata, "/home/jesus/Documents/TFG/satelite_images_sigpac/data/red_green.tif", style, msk_band, sgc_band)
+#raster_comparison(rows, cols, metadata, "/home/jesus/Documents/TFG/satelite_images_sigpac/data/red_green.tif", style, msk_band, sgc_band)
 
 # print("Generating confusion matrix raster: ")
-# raster_comparison_confmatrix(
+#raster_comparison_confmatrix(
 #     rows, cols, metadata, "/home/jesus/Documents/TFG/satelite_images_sigpac/data/conf_matrix_jaen.tif", style, msk_band, sgc_band)
 
 # print("Generating metrics: ")

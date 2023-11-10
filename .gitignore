@@ -9,3 +9,5 @@ vm_data/
 ml/
 scp
 tfg_data/
+__init__.py
+/data

@@ -13,8 +13,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 
-from sklearn.ensemble import    ForestClassifier
-from sklearn.model_selection import train_test_split
+from sklearn.ensemble import ForestClassifier, RandomForestClassifier
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.metrics import confusion_matrix
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
@@ -295,13 +295,63 @@ def train_model_land_cover(land_cover_dataset: str, n_jobs: int = 2):
         x_train_data, y_train_data, test_size=0.15
     )
 
-    # # Train model
-    # clf = MLPClassifier(solver='lbfgs', alpha=0.0001,
-    #                 hidden_layer_sizes=(5,2), random_state=1)
+    clf = RandomForestClassifier(n_jobs=n_jobs)
 
-    clf = SVC(kernel="rbf")
+    param_grid = {
+        'n_estimators' : [50, 100, 20],
+        'max_depth' : [None, 10, 20],
+        'min_sample_split' : [2, 5, 10],
+        'min_sample_leaf' : [1, 2, 4],
+        'max_features' : ['auto', 'sqrt', 'log2'],
+        'bootstrap' : [True, False]
+    }
 
-    # clf = RandomForestClassifier(n_jobs=n_jobs)
+    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    best_model = None
+    best_parameters = float(-9999999)
+    
+
+    for train_index, test_index in kf.split(X_train):
+        X_train_fold, X_val_fold = X_train.iloc[train_index], X_train.iloc[test_index]
+        y_train_fold, y_val_fold = y_train.iloc[train_index], y_train.iloc[test_index]
+        
+        for n_estimators in param_grid['n_estimators']:
+                    for max_depth in param_grid['max_depth']:
+                        for min_samples_split in param_grid['min_samples_split']:
+                            for min_samples_leaf in param_grid['min_samples_leaf']:
+                                for max_features in param_grid['max_features']:
+                                    for bootstrap in param_grid['bootstrap']:
+                                        # Configurar el clasificador con los hiperparámetros actuales
+                                        clf.set_params(
+                                            n_estimators=n_estimators,
+                                            max_depth=max_depth,
+                                            min_samples_split=min_samples_split,
+                                            min_samples_leaf=min_samples_leaf,
+                                            max_features=max_features,
+                                            bootstrap=bootstrap
+                                        )
+                                        #X_train_fold = X_train.reindex(columns=used_columns)
+
+
+                                        # Entrenar el modelo
+                                        clf.fit(X_train_fold, y_train_fold)
+
+                                        # Evaluar en el conjunto de validación
+                                        y_val_pred = clf.predict(X_val_fold)
+                                        current_metric = calcular_metrica(y_val_fold, y_val_pred)
+
+                                        # Comparar con el mejor modelo anterior
+                                        if current_metric > best_metric:
+                                            best_metric = current_metric
+                                            best_model = clf
+
+    # Entrenar el mejor modelo en el conjunto completo de entrenamiento
+    best_model.fit(X_train, y_train)
+
+    # Evaluar en el conjunto de prueba
+    y_test_pred = best_model.predict(X_test)
+    test_metric = calcular_metrica(y_test, y_test_pred)
+
     X_train = X_train.reindex(columns=used_columns)
     print(X_train)
     clf.fit(X_train, y_train)

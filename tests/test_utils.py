@@ -3,7 +3,8 @@ import sys,os
 import pytest
 import unittest.mock as mock
 import rasterio
-from validation import raster_comparison
+
+from src.validation import raster_comparison
 
 from numba import jit
 from utils import *
